@@ -11,8 +11,7 @@ in {
     services = lib.mkOption {
       type = lib.types.listOf lib.types.str;
     };
-
-
+  
   };
 
     # services = mkOption {
@@ -92,7 +91,7 @@ in {
       (builtins.foldl' (acc: elem: acc // elem) {} (builtins.map 
         (servName: (builtins.listToAttrs (lib.attrsets.mapAttrsToList 
           (conName: conDef: {
-            name = "${servName}-${conName}-container";
+            name = "${servName}-${conName}";
             value = { 
               image = conDef.image;
 
@@ -245,23 +244,23 @@ in {
     systemd.services = 
       builtins.listToAttrs (builtins.foldl' (acc: elem: acc ++ elem) [] (builtins.map (servName:
         ((lib.attrsets.mapAttrsToList (conName: conDef: {
-          name = "podman-${conName}";
+          name = "podman-${servName}-${conName}";
           value = { 
               serviceConfig = {
                 User = "${servName}-${conName}-user";
                 Restart = lib.mkOverride 500 "always";
               };
               after = [
-                "podman-network-${conName}.service"
+                "podman-network-${servName}.service"
               ];
               requires = [
-                "podman-network-${conName}.service"
+                "podman-network-${servName}.service"
               ];
               partOf = [
-                "podman-compose-${conName}-root.target"
+                "podman-compose-${servName}-root.target"
               ];
               wantedBy = [
-                "podman-compose-${conName}-root.target"
+                "podman-compose-${servName}-root.target"
               ];
             };
           }
