@@ -12,6 +12,10 @@
         imports = [ ./selfhosting ];
       };
 
+      rss-triggers = {
+        imports = [ ./rss-triggers ];
+      };
+
       smartctl-ssacli-exporter = {
         imports = [ ./smartctl-ssacli-exporter ];
       };

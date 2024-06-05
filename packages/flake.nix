@@ -18,6 +18,8 @@
 
       packages."x86_64-linux".obsidian-link-archiver = pkgs.callPackage ./obsidian-link-archiver {};
 
+      packages."x86_64-linux".rss-feed-trigger = pkgs.callPackage ./rss-feed-trigger {};
+
       packages."x86_64-linux".smartctl-ssacli-exporter = pkgs.callPackage ./smartctl-ssacli-exporter {};
 
       packages."x86_64-linux".hpssacli = pkgs.callPackage ./hpssacli {};
@@ -29,6 +31,8 @@
         rhasspy-speakers-cli-hermes = self.packages."x86_64-linux".rhasspy-speakers-cli-hermes;
         
         obsidian-link-archiver = self.packages."x86_64-linux".obsidian-link-archiver;
+
+        rss-feed-trigger = self.packages."x86_64-linux".rss-feed-trigger;
         
         smartctl-ssacli-exporter = self.packages."x86_64-linux".smartctl-ssacli-exporter;
 
