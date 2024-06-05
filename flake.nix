@@ -2,15 +2,15 @@
   description = "Apocrypha is a set of packages not available to the mainstream";
 
   inputs = {
-    myPackages.url = "./packages";
-    myNixosModules.url = "./nixosModules";
+    apocryphalPackages.url = "./packages";
+    apocryphalNixosModules.url = "./nixosModules";
   };
 
-  outputs = { self, myPackages, myNixosModules }: {
+  outputs = { self, apocryphalPackages, apocryphalNixosModules }: {
 
-    nixosModules = myNixosModules.nixosModules;
-    packages = myPackages.packages;
-    overlays = myPackages.overlays;
+    nixosModules = apocryphalNixosModules.nixosModules;
+    packages = apocryphalPackages.packages;
+    overlays = apocryphalPackages.overlays;
   };
 }
 

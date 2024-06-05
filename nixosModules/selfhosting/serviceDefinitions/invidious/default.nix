@@ -1,10 +1,10 @@
 {
   containers = {
-    "invidious" = {
+    "invidious-app" = {
       image = "quay.io/invidious/invidious:latest";
 
       # proxy = {
-      #   hostname = "invidious.chiliahedron.wtf";
+        # hostname = "invidious.chiliahedron.wtf";
         
       #   public = false;
       #   external = true;
@@ -29,7 +29,7 @@
       ];
 
       dependsOn = [
-        "invidious-db"
+        "invidious-invidious-db"
       ];
 
       extraOptions = [
@@ -52,16 +52,19 @@
         {
           hostPath = "/srv/container/invidious/config/sql";
           containerPath = "/config/sql";
+          volumeType = "directory";
           mountOptions = "rw";
         }
         {
           hostPath = "/srv/container/invidious/data";
           containerPath = "/var/lib/postgresql/data";
+          volumeType = "directory";
           mountOptions = "rw";
         }
         {
           hostPath = "/srv/container/invidious/init-invidious-db.sh";
           containerPath = "/docker-entrypoint-initdb.d/init-invidious-db.sh";
+          volumeType = "file";
           mountOptions = "rw,z";
         }
       ];

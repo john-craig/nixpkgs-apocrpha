@@ -3,7 +3,9 @@ let
   internalProxyRules = "HeadersRegexp(`X-Real-Ip`, `(^192\.168\.[0-9]+\.[0-9]+)|(^100\.127\.79\.104)`)";
   reverseProxyNetwork = "chiliahedron-services";
   proxyTLSResolver = "chiliahedron-resolver";
+  
   selfhostedDefinitions = import ./serviceDefinitions/default.nix;
+  # selfhostedDefinitions = (builtins.getFlake "git+https://gitea.chiliahedron.wtf/chiliahedron/services-library/commit/4a32b74543bca0e675560d5ae9d6810f77eb7968").default;
 in {
   options.services.selfhosted = {
     enable = lib.mkEnableOption "Self-hosted Services";
@@ -37,6 +39,10 @@ in {
     # };
 
   config = lib.mkIf config.services.selfhosted.enable {
+    environment.systemPackages = [
+      pkgs.bindfs
+    ];
+
     virtualisation.podman = {
       enable = true;
       autoPrune.enable = true;
@@ -94,6 +100,8 @@ in {
             name = "${servName}-${conName}";
             value = { 
               image = conDef.image;
+              
+              user = "${servName}-${conName}:${servName}-${conName}";
 
               #######################################
               # Labels
@@ -137,7 +145,9 @@ in {
                   "traefik.http.routers.${conName}-public.tls" = "true";
                   "traefik.http.routers.${conName}-public.tls.certresolver" = "${proxyTLSResolver}";
                   "traefik.http.services.${conName}.loadbalancer.server.port" = (builtins.elemAt conDef.ports 0).containerPort;
-                };
+                } //
+              lib.attrsets.optionalAttrs
+                (builtins.hasAttr "extraLabels" conDef) conDef;
 
               #######################################
               # Environment Variables
@@ -166,9 +176,9 @@ in {
                 (builtins.map (volume: 
                   if builtins.hasAttr "mountOptions" volume
                   then
-                    "${volume.hostPath}:${volume.containerPath}:${volume.mountOptions}"
+                    "/var/lib/selfhosted/${servName}/${conName}/${volume.containerPath}:${volume.containerPath}:${volume.mountOptions}"
                   else
-                    "${volume.hostPath}:${volume.containerPath}"
+                    "/var/lib/selfhosted/${servName}/${conName}/${volume.containerPath}:${volume.containerPath}"
                 ) conDef.volumes);
 
               #######################################
@@ -201,7 +211,7 @@ in {
       (builtins.foldl' (acc: elem: acc // elem) {} (builtins.map 
           (servName: (builtins.listToAttrs (lib.attrsets.mapAttrsToList 
             (conName: conDef: {
-              name = "${servName}-${conName}-group";
+              name = "${servName}-${conName}";
               value = {};
           }) (builtins.getAttr servName selfhostedDefinitions).containers)
         )
@@ -211,50 +221,76 @@ in {
       (builtins.foldl' (acc: elem: acc // elem) {} (builtins.map 
           (servName: (builtins.listToAttrs (lib.attrsets.mapAttrsToList 
             (conName: conDef: {
-              name = "${servName}-${conName}-user";
+              name = "${servName}-${conName}";
               value = { 
                 isSystemUser = true;
-                group = "${servName}-${conName}-group";
+                group = "${servName}-${conName}";
               };
           }) (builtins.getAttr servName selfhostedDefinitions).containers)
         )
       ) config.services.selfhosted.services));
 
     # Define tmpfiles for each host mount point
-    systemd.tmpfiles.rules = builtins.foldl' (acc: elem: acc ++ elem) [] (builtins.map (servName:
-        builtins.foldl' (acc: elem: acc ++ elem) [] (lib.attrsets.mapAttrsToList (conName: conDef: 
-          builtins.map (volDef:
-            let 
-              hostPath = if (volDef.volumeType == "directory")
-                then volDef.hostPath
-                else lib.strings.concatStringsSep "/"
-                  lib.lists.sublist 0 ((builtins.length (lib.strings.splitString "/" volDef.hostPath)) - 1)
-                    (lib.strings.splitString "/" volDef.hostPath);
-              user = "${servName}-${conName}-user";
-              group = "${servName}-${conName}-group";
-            in 
-              "d ${volDef.hostPath} 0755 ${user} ${group}"
-          )
-          (lib.lists.optionals (builtins.hasAttr "volumes" conDef) conDef.volumes)
-        ) (builtins.getAttr servName selfhostedDefinitions).containers)
-      ) config.services.selfhosted.services);
+    # systemd.tmpfiles.rules = builtins.foldl' (acc: elem: acc ++ elem) [] (builtins.map (servName:
+    #     builtins.foldl' (acc: elem: acc ++ elem) [] (lib.attrsets.mapAttrsToList (conName: conDef: 
+    #       builtins.map (volDef:
+    #         let 
+    #           user = "${servName}-${conName}";
+    #           group = "${servName}-${conName}";
+    #         in 
+    #           if (volDef.volumeType == "directory")
+    #           then "d ${volDef.hostPath} 0755 ${user} ${group}"
+    #           else "f ${volDef.hostPath} 0755 ${user} ${group}"
+    #       )
+    #       (lib.lists.optionals (builtins.hasAttr "volumes" conDef) conDef.volumes)
+    #     ) (builtins.getAttr servName selfhostedDefinitions).containers)
+    #   ) config.services.selfhosted.services);
 
     # Define systemd services for each container in each service,
     # and for each service
     systemd.services = 
       builtins.listToAttrs (builtins.foldl' (acc: elem: acc ++ elem) [] (builtins.map (servName:
         ((lib.attrsets.mapAttrsToList (conName: conDef: {
+          # Mapping for the container's mounts
+          name = "podman-mount-${servName}-${conName}";
+          value = { 
+              serviceConfig = {
+                Restart = lib.mkOverride 500 "always";
+              };
+              script = lib.string.concatMapString (volDef:
+                ''
+                  stat /var/lib/selfhosted/${servName}/${conName}/${volDef.containerPath} || ${pkgs.bindfs} --force-user ${servName}-${conName} --force-group ${servName}-${conName} ${volDef.hostPath} /var/lib/selfhosted/${servName}/${conName}/${volDef.containerPath}
+                '') conDef.volumes;
+              after = [
+                # Put user-defined "preMountHooks" here
+              ];
+              requires = [
+                # Put user-defined "preMountHooks" here
+              ];
+              partOf = [
+                "podman-compose-${servName}-root.target"
+              ];
+              wantedBy = [
+                "podman-compose-${servName}-root.target"
+              ];
+            };
+          }
+        ) (builtins.getAttr servName selfhostedDefinitions).containers) ++ 
+        
+        (lib.attrsets.mapAttrsToList (conName: conDef: {
+           # Mapping for the container units
           name = "podman-${servName}-${conName}";
           value = { 
               serviceConfig = {
-                User = "${servName}-${conName}-user";
                 Restart = lib.mkOverride 500 "always";
               };
               after = [
                 "podman-network-${servName}.service"
+                "podman-mount-${servName}-${conName}.service"
               ];
               requires = [
                 "podman-network-${servName}.service"
+                "podman-mount-${servName}-${conName}.service"
               ];
               partOf = [
                 "podman-compose-${servName}-root.target"
@@ -266,6 +302,7 @@ in {
           }
         ) (builtins.getAttr servName selfhostedDefinitions).containers) ++ 
         [ {
+           # Mapping for the service network
           "name" = "podman-network-${servName}";
           "value" = {
             path = [ pkgs.podman ];
