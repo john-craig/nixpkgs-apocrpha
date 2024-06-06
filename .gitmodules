@@ -1,0 +1,3 @@
+[submodule "nixosModules/selfhosting/services-library"]
+	path = nixosModules/selfhosting/services-library
+	url = https://gitea.chiliahedron.wtf/chiliahedron/services-library

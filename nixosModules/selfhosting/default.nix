@@ -1,11 +1,10 @@
- { pkgs, lib, config, ... }: 
+ { pkgs, lib, config, fetchFromGitea, ... }: 
 let
   internalProxyRules = "HeadersRegexp(`X-Real-Ip`, `(^192\.168\.[0-9]+\.[0-9]+)|(^100\.127\.79\.104)`)";
   reverseProxyNetwork = "chiliahedron-services";
   proxyTLSResolver = "chiliahedron-resolver";
   
-  selfhostedDefinitions = import ./serviceDefinitions/default.nix;
-  # selfhostedDefinitions = (builtins.getFlake "git+https://gitea.chiliahedron.wtf/chiliahedron/services-library/commit/4a32b74543bca0e675560d5ae9d6810f77eb7968").default;
+  selfhostedDefinitions = import ./services-library/default.nix;
 in {
   options.services.selfhosted = {
     enable = lib.mkEnableOption "Self-hosted Services";
