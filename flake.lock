@@ -2,16 +2,17 @@
   "nodes": {
     "apocryphalNixosModules": {
       "inputs": {
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "services-library": "services-library"
       },
       "locked": {
         "lastModified": 1,
-        "narHash": "sha256-lxX0ahLIknKeGeDYL+dorripl11G7KZ/0lWbhh978jM=",
-        "path": "/nix/store/6xdlpgdnwr4nb6nmy5xzn0008xr4liyg-source/nixosModules",
+        "narHash": "sha256-o6/z5McvLxDptY+D3vySMkkhBXSJMqgO2gl/r2AyjRk=",
+        "path": "/nix/store/0646vpvyp8p2y4r16g74d25xajn8hcfg-source/nixosModules",
         "type": "path"
       },
       "original": {
-        "path": "/nix/store/6xdlpgdnwr4nb6nmy5xzn0008xr4liyg-source/nixosModules",
+        "path": "/nix/store/0646vpvyp8p2y4r16g74d25xajn8hcfg-source/nixosModules",
         "type": "path"
       }
     },
@@ -23,11 +24,11 @@
       "locked": {
         "lastModified": 1,
         "narHash": "sha256-3QG8NnuKJwnCkylmeBJHPwXeQLnf8FLN2ZsQBTuze5Y=",
-        "path": "/nix/store/6xdlpgdnwr4nb6nmy5xzn0008xr4liyg-source/packages",
+        "path": "/nix/store/0646vpvyp8p2y4r16g74d25xajn8hcfg-source/packages",
         "type": "path"
       },
       "original": {
-        "path": "/nix/store/6xdlpgdnwr4nb6nmy5xzn0008xr4liyg-source/packages",
+        "path": "/nix/store/0646vpvyp8p2y4r16g74d25xajn8hcfg-source/packages",
         "type": "path"
       }
     },
@@ -67,6 +68,21 @@
       "inputs": {
         "apocryphalNixosModules": "apocryphalNixosModules",
         "apocryphalPackages": "apocryphalPackages"
+      }
+    },
+    "services-library": {
+      "locked": {
+        "lastModified": 1718189466,
+        "narHash": "sha256-E/dgACFj99mW4l0zuecu/PtVgpw2RNVX7/IwDo3NJG0=",
+        "ref": "refs/heads/main",
+        "rev": "6ebd574855017825462f314add6be8017bceaa7b",
+        "revCount": 6,
+        "type": "git",
+        "url": "https://gitea.chiliahedron.wtf/chiliahedron/services-library"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://gitea.chiliahedron.wtf/chiliahedron/services-library"
       }
     },
     "systems": {
