@@ -1,5 +1,20 @@
 {
   "nodes": {
+    "get-flake": {
+      "locked": {
+        "lastModified": 1714237590,
+        "narHash": "sha256-9gtHdGbzFHaR20xORN8IYd67ROWS+1nqQ5CsPf9MD8I=",
+        "owner": "ursi",
+        "repo": "get-flake",
+        "rev": "a6c57417d1b857b8be53aba4095869a0f438c502",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ursi",
+        "repo": "get-flake",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1717196966,
@@ -18,6 +33,7 @@
     },
     "root": {
       "inputs": {
+        "get-flake": "get-flake",
         "nixpkgs": "nixpkgs"
       }
     }

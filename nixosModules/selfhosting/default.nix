@@ -1,10 +1,11 @@
- { pkgs, lib, config, fetchFromGitea, ... }: 
+ { services-library, ... }: 
+ { pkgs, lib, config, ... }: 
 let
   internalProxyRules = "HeadersRegexp(`X-Real-Ip`, `(^192\.168\.[0-9]+\.[0-9]+)|(^100\.127\.79\.104)`)";
   reverseProxyNetwork = "chiliahedron-services";
   proxyTLSResolver = "chiliahedron-resolver";
   
-  selfhostedDefinitions = import ./services-library/default.nix;
+  selfhostedDefinitions = services-library.default;
 in {
   options.services.selfhosted = {
     enable = lib.mkEnableOption "Self-hosted Services";
@@ -111,6 +112,7 @@ in {
               lib.attrsets.optionalAttrs 
                 (builtins.hasAttr "proxy" conDef &&
                  builtins.hasAttr "hostname" conDef.proxy &&
+                 builtins.hasAttr "external" conDef.proxy &&
                  conDef.proxy.external) {
                   "traefik.enable" = "true";
                   "traefik.docker.network" = "${reverseProxyNetwork}";
@@ -124,6 +126,7 @@ in {
               lib.attrsets.optionalAttrs 
                 (builtins.hasAttr "proxy" conDef &&
                 builtins.hasAttr "hostname" conDef.proxy &&
+                builtins.hasAttr "internal" conDef.proxy &&
                 conDef.proxy.internal) {
                   "traefik.enable" = "true";
                   "traefik.docker.network" = "${reverseProxyNetwork}";
@@ -136,6 +139,7 @@ in {
               lib.attrsets.optionalAttrs 
                 (builtins.hasAttr "proxy" conDef &&
                 builtins.hasAttr "hostname" conDef.proxy &&
+                builtins.hasAttr "public" conDef.proxy &&
                 conDef.proxy.public) {
                   "traefik.enable" = "true";
                   "traefik.docker.network" = "${reverseProxyNetwork}";
@@ -256,7 +260,7 @@ in {
               serviceConfig = {
                 Restart = lib.mkOverride 500 "always";
               };
-              script = lib.string.concatMapString (volDef:
+              script = lib.strings.concatMapStrings (volDef:
                 ''
                   stat /var/lib/selfhosted/${servName}/${conName}/${volDef.containerPath} || ${pkgs.bindfs} --force-user ${servName}-${conName} --force-group ${servName}-${conName} ${volDef.hostPath} /var/lib/selfhosted/${servName}/${conName}/${volDef.containerPath}
                 '') conDef.volumes;

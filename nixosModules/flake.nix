@@ -3,15 +3,14 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    
+
+    services-library.url = "git+https://gitea.chiliahedron.wtf/chiliahedron/services-library";
   };
 
-  outputs = { self, nixpkgs }@inputs: {
+  outputs = { self, services-library, nixpkgs }@inputs: {
 
     nixosModules = {
-      selfhosting = {
-        imports = [ ./selfhosting ];
-      };
+      selfhosting = (import ./selfhosting inputs);
 
       rss-triggers = {
         imports = [ ./rss-triggers ];
