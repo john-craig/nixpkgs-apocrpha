@@ -40,7 +40,8 @@ in {
 
   config = lib.mkIf config.services.selfhosted.enable {
     environment.systemPackages = [
-      pkgs.bindfs
+      pkgs.acl
+      pkgs.gnugrep
     ];
 
     virtualisation.podman = {
@@ -102,6 +103,9 @@ in {
               image = conDef.image;
               
               user = "${servName}-${conName}:${servName}-${conName}";
+
+              cmd = lib.lists.optionals
+                (builtins.hasAttr "cmd" conDef) conDef.cmd;
 
               #######################################
               # Labels
@@ -174,14 +178,26 @@ in {
               #######################################
               # Volumes
               #######################################
-              volumes = lib.lists.optionals 
+              volumes = [ 
+                "/etc/passwd:/etc/passwd:ro" 
+                "/etc/group:/etc/group:ro"
+              ] ++ lib.lists.optionals 
                 (builtins.hasAttr "ports" conDef)
-                (builtins.map (volume: 
-                  if builtins.hasAttr "mountOptions" volume
-                  then
-                    "/var/lib/selfhosted/${servName}/${conName}/${volume.containerPath}:${volume.containerPath}:${volume.mountOptions}"
-                  else
-                    "/var/lib/selfhosted/${servName}/${conName}/${volume.containerPath}:${volume.containerPath}"
+                (builtins.map (volDef: 
+                  let
+                    conPath = volDef.containerPath;
+                    hostPath = volDef.hostPath;
+
+                    conBase = builtins.baseNameOf conPath;
+                    varHash = builtins.hashString "sha256" "${hostPath}-${conPath}";
+
+                    varPath = "/var/lib/selfhosted/${servName}/${conName}/${varHash}-${conBase}";
+                  in
+                    if builtins.hasAttr "mountOptions" volDef
+                    then
+                      "${varPath}:${volDef.containerPath}:${volDef.mountOptions}"
+                    else
+                      "${varPath}:${volDef.containerPath}"
                 ) conDef.volumes);
 
               #######################################
@@ -195,12 +211,18 @@ in {
                   conDef.extraOptions ++
 
                 # Connect to proxy network
-                lib.lists.optional (builtins.hasAttr "proxy" conDef)
-                  "--network=${reverseProxyNetwork}" ++
+                lib.lists.optionals (builtins.hasAttr "proxy" conDef)
+                  [ "--network=${reverseProxyNetwork}" ] ++
+
+                # Connect to external network
+                lib.lists.optionals (builtins.hasAttr "networks" conDef &&
+                  builtins.hasAttr "external" conDef.networks &&
+                  conDef.networks.external)
+                  [ "--network=${servName}-external" ] ++
 
                 # Add default network connections
                 [ "--network-alias=${conName}"
-                  "--network=${servName}" 
+                  "--network=${servName}-internal" 
                 ];
 
               dependsOn = lib.mkIf (builtins.hasAttr "dependsOn" conDef) conDef.dependsOn;
@@ -233,21 +255,16 @@ in {
         )
       ) config.services.selfhosted.services));
 
-    # Define tmpfiles for each host mount point
-    # systemd.tmpfiles.rules = builtins.foldl' (acc: elem: acc ++ elem) [] (builtins.map (servName:
-    #     builtins.foldl' (acc: elem: acc ++ elem) [] (lib.attrsets.mapAttrsToList (conName: conDef: 
-    #       builtins.map (volDef:
-    #         let 
-    #           user = "${servName}-${conName}";
-    #           group = "${servName}-${conName}";
-    #         in 
-    #           if (volDef.volumeType == "directory")
-    #           then "d ${volDef.hostPath} 0755 ${user} ${group}"
-    #           else "f ${volDef.hostPath} 0755 ${user} ${group}"
-    #       )
-    #       (lib.lists.optionals (builtins.hasAttr "volumes" conDef) conDef.volumes)
-    #     ) (builtins.getAttr servName selfhostedDefinitions).containers)
-    #   ) config.services.selfhosted.services);
+    # Define tmpfiles for each container
+    systemd.tmpfiles.rules = builtins.foldl' (acc: elem: acc ++ elem) [] (builtins.map (servName:
+        (lib.attrsets.mapAttrsToList (conName: conDef: 
+          let 
+            user = "${servName}-${conName}"; 
+            group = "${servName}-${conName}";
+          in 
+            "d /var/lib/selfhosted/${servName}/${conName} 0700 ${user} ${group}"
+        ) (builtins.getAttr servName selfhostedDefinitions).containers)
+      ) config.services.selfhosted.services);
 
     # Define systemd services for each container in each service,
     # and for each service
@@ -258,17 +275,72 @@ in {
           name = "podman-mount-${servName}-${conName}";
           value = { 
               serviceConfig = {
-                Restart = lib.mkOverride 500 "always";
+                Type = "oneshot";
+                RemainAfterExit = true;
               };
+              # Setup
               script = lib.strings.concatMapStrings (volDef:
-                ''
-                  stat /var/lib/selfhosted/${servName}/${conName}/${volDef.containerPath} || ${pkgs.bindfs} --force-user ${servName}-${conName} --force-group ${servName}-${conName} ${volDef.hostPath} /var/lib/selfhosted/${servName}/${conName}/${volDef.containerPath}
+                let
+                  user = "${servName}-${conName}";
+                  group = "${servName}-${conName}";
+
+                  # Translate "rw,Z" or "ro", etc. to "rw" or "r" for setfacl
+                  volPerms = if 
+                    ((builtins.elemAt (lib.strings.splitString "," volDef.mountOptions) 0) == "ro")
+                    then "r"
+                    else "rwx";
+
+                  conPath = volDef.containerPath;
+                  hostPath = volDef.hostPath;
+
+                  conBase = builtins.baseNameOf conPath;
+                  varHash = builtins.hashString "sha256" "${hostPath}-${conPath}";
+
+                  varPath = "/var/lib/selfhosted/${servName}/${conName}/${varHash}-${conBase}";
+                in ''
+                  # Check to see if the file on the hostpath already allows the correct permissions
+                  # The output of `getfacl -ac` looks like this:
+                  #     user::rwx
+                  #     user:timeflip-tracker-database:rw-
+                  #     group::---
+                  #     group:timeflip-tracker-database:rw-
+                  #     mask::rw-
+                  #     other::---
+                  # So we can use a regular expression with grep to see if either our user/group has permission, or
+                  # the 'other' category has permission. Note that this doesn't cover the actual base user/group of
+                  # the directory.
+                  $(${pkgs.acl}/bin/getfacl -ac ${hostPath} | ${pkgs.gnugrep}/bin/grep -E '(:${user}:|:${group}:|other::)' | ${pkgs.gnugrep}/bin/grep -E -q ':${volPerms}') || $(${pkgs.acl}/bin/setfacl -R -m u:${user}:${volPerms} ${hostPath}; ${pkgs.acl}/bin/setfacl -R -m g:${group}:${volPerms} ${hostPath};)
+
+                  # Create a symlink to that volume path
+                  stat ${varPath} || $(ln -s ${hostPath} ${varPath} && chown -Rh ${user}:${group} ${varPath})
+                '') conDef.volumes;
+              
+              # Cleanup
+              postStop = lib.strings.concatMapStrings (volDef:
+                let
+                  user = "${servName}-${conName}";
+                  group = "${servName}-${conName}";
+
+                  conPath = volDef.containerPath;
+                  hostPath = volDef.hostPath;
+
+                  conBase = builtins.baseNameOf conPath;
+                  varHash = builtins.hashString "sha256" "${hostPath}-${conPath}";
+
+                  varPath = "/var/lib/selfhosted/${servName}/${conName}/${varHash}-${conBase}";
+                in ''
+                  # Remove extended attributes
+                  ${pkgs.acl}/bin/setfacl -R -x u:${user} ${hostPath}
+                  ${pkgs.acl}/bin/setfacl -R -x g:${group} ${hostPath}
+
+                  rm -f ${varPath}
                 '') conDef.volumes;
               after = [
                 # Put user-defined "preMountHooks" here
               ];
               requires = [
                 # Put user-defined "preMountHooks" here
+                # TODO: make this dependant upon the tmpfiles
               ];
               partOf = [
                 "podman-compose-${servName}-root.target"
@@ -312,10 +384,14 @@ in {
             serviceConfig = {
               Type = "oneshot";
               RemainAfterExit = true;
-              ExecStop = "${pkgs.podman}/bin/podman network rm -f ${servName}";
             };
             script = ''
-              podman network inspect ${servName} || podman network create ${servName} --internal
+              podman network inspect ${servName}-internal || podman network create ${servName}-internal --internal
+              podman network inspect ${servName}-external || podman network create ${servName}-external
+            '';
+            postStop = ''
+              ${pkgs.podman}/bin/podman network rm -f ${servName}-internal
+              ${pkgs.podman}/bin/podman network rm -f ${servName}-external
             '';
             partOf = [ "podman-compose-${servName}-root.target" ];
             wantedBy = [ "podman-compose-${servName}-root.target" ];
@@ -329,7 +405,7 @@ in {
         "name" = "podman-compose-${servName}-root";
         "value" = {
           unitConfig = {
-            Description = "Root target generated by compose2nix.";
+            Description = "Root target for ${servName} service";
           };
           wantedBy = [ "multi-user.target" ];
         };
