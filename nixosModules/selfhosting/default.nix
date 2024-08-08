@@ -70,11 +70,45 @@ in {
             ) acc servDef.containers
           )) init services
         );
+      
+      containerHasLowPort = conDef: (
+        lib.lists.foldl (acc: portDef:
+          acc || (lib.strings.toInt portDef.hostPort) < 1024
+        ) false (lib.lists.optionals 
+              (builtins.hasAttr "ports" conDef)
+              conDef.ports)
+      );
+
+      mapVolumeAttrs = servName: conName: volDef: (
+        rec {
+          conPath = volDef.containerPath;
+          hostPath = volDef.hostPath;
+
+          hostDir = if lib.filesystem.pathIsDirectory (/. + hostPath)
+            then hostPath
+            else builtins.dirOf hostPath;
+
+          # For a path to a directory, the last subdirectory in the path
+          # is used as the container base, (e.g. in /usr/bin/, `bin` would be used)
+          # For a path to a file, the the subdirectory containing the file
+          # is used as the container base, (e.g. in /usr/bin/test, `bin` would be used)
+          hostBase = if lib.filesystem.pathIsDirectory (/. + hostPath)
+            then builtins.baseNameOf hostPath
+            else builtins.baseNameOf (builtins.dirOf hostPath);
+          varHash = builtins.hashString "sha256" "${hostPath}-${conPath}";
+
+          varDir = "/var/lib/selfhosted/${servName}/${conName}/${varHash}-${hostBase}";
+          varPath = if lib.filesystem.pathIsDirectory (/. + hostPath)
+            then varDir
+            else "${varDir}/${builtins.baseNameOf hostPath}";
+        }
+      );
 
     in lib.mkIf config.services.selfhosted.enable {
     environment.systemPackages = [
       pkgs.acl
       pkgs.gnugrep
+      pkgs.bindfs
     ];
 
     virtualisation.podman = {
@@ -94,8 +128,6 @@ in {
         acc // {
           "${servName}-${conName}" = {
             image = conDef.image;
-            
-            user = "${servName}-${conName}:${servName}-${conName}";
 
             cmd = lib.lists.optionals
               (builtins.hasAttr "cmd" conDef) conDef.cmd;
@@ -147,7 +179,7 @@ in {
                 "traefik.http.services.${conName}.loadbalancer.server.port" = (builtins.elemAt conDef.ports 0).containerPort;
               } //
             lib.attrsets.optionalAttrs
-              (builtins.hasAttr "extraLabels" conDef) conDef;
+              (builtins.hasAttr "extraLabels" conDef) conDef.extraLabels;
 
             #######################################
             # Environment Variables
@@ -171,26 +203,17 @@ in {
             #######################################
             # Volumes
             #######################################
-            volumes = [ 
-              "/etc/passwd:/etc/passwd:ro" 
-              "/etc/group:/etc/group:ro"
-            ] ++ lib.lists.optionals 
+            volumes = lib.lists.optionals 
               (builtins.hasAttr "volumes" conDef)
               (builtins.map (volDef: 
                 let
-                  conPath = volDef.containerPath;
-                  hostPath = volDef.hostPath;
-
-                  conBase = builtins.baseNameOf conPath;
-                  varHash = builtins.hashString "sha256" "${hostPath}-${conPath}";
-
-                  varPath = "/var/lib/selfhosted/${servName}/${conName}/${varHash}-${conBase}";
+                  volAttrs = mapVolumeAttrs servName conName volDef;
                 in
                   if builtins.hasAttr "mountOptions" volDef
                   then
-                    "${varPath}:${volDef.containerPath}:${volDef.mountOptions}"
+                    "${volAttrs.varPath}:${volDef.containerPath}:${volDef.mountOptions},U"
                   else
-                    "${varPath}:${volDef.containerPath}"
+                    "${volAttrs.varPath}:${volDef.containerPath}:U"
               ) conDef.volumes);
 
             #######################################
@@ -222,18 +245,6 @@ in {
           };
         })
       ) {} serviceDefinitions);
-
-
-
-      # (builtins.foldl' (acc: elem: acc // elem) {} (builtins.map 
-      #   (servName: (builtins.listToAttrs (lib.attrsets.mapAttrsToList 
-      #     (conName: conDef: {
-      #       name = "${servName}-${conName}";
-      #       value = { 
-              
-      #     }) (builtins.getAttr servName servicesLibrary).containers)
-      #   )
-      # ) config.services.selfhosted.services));
   
     # Define users for each container within each service
     users.groups = (reduceContainers (acc: servName: servDef: conName: conDef: (
@@ -259,11 +270,13 @@ in {
           group = "${servName}-${conName}";
         in 
           "d /var/lib/selfhosted/${servName}/${conName} 0700 ${user} ${group}")
-      ])
+      ]
+     )
     )) [] serviceDefinitions;
+    
 
     systemd.services = 
-      # Define services to set up the mountpoints for each container
+      # Define mounts for each container
       ((reduceContainers (acc: servName: servDef: conName: conDef: (
         acc // {
           "podman-mount-${servName}-${conName}" = {
@@ -271,69 +284,36 @@ in {
               Type = "oneshot";
               RemainAfterExit = true;
             };
-            # Setup
-            script = lib.strings.concatMapStrings (volDef:
+            path = [ pkgs.bindfs ];
+            script = lib.strings.concatLines (builtins.map (volDef:
               let
-                user = "${servName}-${conName}";
-                group = "${servName}-${conName}";
-
-                # Translate "rw,Z" or "ro", etc. to "rw" or "r" for setfacl
-                volPerms = if 
-                  ((builtins.elemAt (lib.strings.splitString "," volDef.mountOptions) 0) == "ro")
-                  then "r"
-                  else "rwx";
-
-                conPath = volDef.containerPath;
-                hostPath = volDef.hostPath;
-
-                conBase = builtins.baseNameOf conPath;
-                varHash = builtins.hashString "sha256" "${hostPath}-${conPath}";
-
-                varPath = "/var/lib/selfhosted/${servName}/${conName}/${varHash}-${conBase}";
-              in ''
-                # Check to see if the file on the hostpath already allows the correct permissions
-                # The output of `getfacl -ac` looks like this:
-                #     user::rwx
-                #     user:timeflip-tracker-database:rw-
-                #     group::---
-                #     group:timeflip-tracker-database:rw-
-                #     mask::rw-
-                #     other::---
-                # So we can use a regular expression with grep to see if either our user/group has permission, or
-                # the 'other' category has permission. Note that this doesn't cover the actual base user/group of
-                # the directory.
-                $(${pkgs.acl}/bin/getfacl -ac ${hostPath} | ${pkgs.gnugrep}/bin/grep -E '(:${user}:|:${group}:|other::)' | ${pkgs.gnugrep}/bin/grep -E -q ':${volPerms}') || $(${pkgs.acl}/bin/setfacl -R -m u:${user}:${volPerms} ${hostPath}; ${pkgs.acl}/bin/setfacl -R -m g:${group}:${volPerms} ${hostPath};)
-
-                # Create a symlink to that volume path
-                stat ${varPath} || $(ln -s ${hostPath} ${varPath} && chown -Rh ${user}:${group} ${varPath})
-              '') conDef.volumes;
-            
-            # Cleanup
-            postStop = lib.strings.concatMapStrings (volDef:
+                volAttrs = mapVolumeAttrs servName conName volDef;
+              in
+                ''
+                  ${pkgs.umount}/bin/umount ${volAttrs.varDir} || true
+                  rm -rf ${volAttrs.varDir} || true
+                  mkdir ${volAttrs.varDir}
+                  bindfs ${volAttrs.hostDir} ${volAttrs.varDir}
+                ''
+            ) conDef.volumes);
+            postStop = lib.strings.concatLines (builtins.map (volDef:
               let
-                user = "${servName}-${conName}";
-                group = "${servName}-${conName}";
-
-                conPath = volDef.containerPath;
-                hostPath = volDef.hostPath;
-
-                conBase = builtins.baseNameOf conPath;
-                varHash = builtins.hashString "sha256" "${hostPath}-${conPath}";
-
-                varPath = "/var/lib/selfhosted/${servName}/${conName}/${varHash}-${conBase}";
-              in ''
-                # Remove extended attributes
-                ${pkgs.acl}/bin/setfacl -R -x u:${user} ${hostPath}
-                ${pkgs.acl}/bin/setfacl -R -x g:${group} ${hostPath}
-
-                rm -f ${varPath}
-              '') conDef.volumes;
+                volAttrs = mapVolumeAttrs servName conName volDef;
+              in
+                ''
+                  ${pkgs.umount}/bin/umount ${volAttrs.varDir} || true
+                  rm -rf ${volAttrs.varDir} || true
+                ''
+            ) conDef.volumes);
             after = [
-              # Put user-defined "preMountHooks" here
+              "podman-network-${servName}.service"
+              # TODO: make dependent on corresponding tmpfiles rule
+              # "podman-mount-${servName}-${conName}.service"
             ];
             requires = [
-              # Put user-defined "preMountHooks" here
-              # TODO: make this dependant upon the tmpfiles
+              "podman-network-${servName}.service"
+              # TODO: make dependent on corresponding tmpfiles rule
+              # "podman-mount-${servName}-${conName}.service"
             ];
             partOf = [
               "podman-compose-${servName}-root.target"
@@ -350,7 +330,15 @@ in {
           "podman-${servName}-${conName}" = {
             serviceConfig = {
               Restart = lib.mkOverride 500 "always";
-            };
+            } //
+            # If the container is the reverse proxy for the
+            # cluster, it gets some sepcial capabilities
+              lib.attrsets.optionalAttrs 
+               (containerHasLowPort conDef)
+               {
+                  # AmbientCapabilities = [ "CAP_NET_BIND_SERVICE" ];
+                  # CapabilityBoundingSet = [ "CAP_NET_BIND_SERVICE" ];
+               };
             after = [
               "podman-network-${servName}.service"
               "podman-mount-${servName}-${conName}.service"
@@ -368,7 +356,7 @@ in {
           };
         })
       )) {} serviceDefinitions) //
-      # Define networks for each service
+      # Define internal networks for each service
       (reduceServices (acc: servName: servDef: (
         acc // {
           "podman-network-${servName}" = {
@@ -389,6 +377,30 @@ in {
             wantedBy = [ "podman-compose-${servName}-root.target" ];
           };
         })
+      ) {} serviceDefinitions) //
+      # Define global external networks
+      (reduceContainers (acc: servName: servDef: conName: conDef: (
+        acc //
+        # Reverse proxy network
+        lib.attrsets.optionalAttrs 
+          (builtins.hasAttr "proxy" conDef)
+          {
+            "podman-network-${reverseProxyNetwork}" = {
+              path = [ pkgs.podman ];
+              serviceConfig = {
+                Type = "oneshot";
+                RemainAfterExit = true;
+              };
+              script = ''
+                podman network inspect ${reverseProxyNetwork} || podman network create ${reverseProxyNetwork}
+              '';
+              postStop = ''
+                ${pkgs.podman}/bin/podman network rm -f ${reverseProxyNetwork}
+              '';
+              partOf = [ "podman-compose-${servName}-root.target" ];
+              wantedBy = [ "podman-compose-${servName}-root.target" ];
+            };
+          })
       ) {} serviceDefinitions);
     
     # Define a target for each service
