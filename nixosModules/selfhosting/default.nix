@@ -293,7 +293,7 @@ in {
                   ${pkgs.umount}/bin/umount ${volAttrs.varDir} || true
                   rm -rf ${volAttrs.varDir} || true
                   mkdir ${volAttrs.varDir}
-                  bindfs ${volAttrs.hostDir} ${volAttrs.varDir}
+                  ${pkgs.util-linux}/bin/mount --bind ${volAttrs.hostDir} ${volAttrs.varDir}
                 ''
             ) conDef.volumes);
             postStop = lib.strings.concatLines (builtins.map (volDef:

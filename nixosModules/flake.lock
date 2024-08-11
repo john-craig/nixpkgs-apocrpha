@@ -1,20 +1,5 @@
 {
   "nodes": {
-    "get-flake": {
-      "locked": {
-        "lastModified": 1714237590,
-        "narHash": "sha256-9gtHdGbzFHaR20xORN8IYd67ROWS+1nqQ5CsPf9MD8I=",
-        "owner": "ursi",
-        "repo": "get-flake",
-        "rev": "a6c57417d1b857b8be53aba4095869a0f438c502",
-        "type": "github"
-      },
-      "original": {
-        "owner": "ursi",
-        "repo": "get-flake",
-        "type": "github"
-      }
-    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1717196966,
@@ -33,8 +18,23 @@
     },
     "root": {
       "inputs": {
-        "get-flake": "get-flake",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "services-library": "services-library"
+      }
+    },
+    "services-library": {
+      "locked": {
+        "lastModified": 1723371292,
+        "narHash": "sha256-c8sveILXhUKz8sKbTT7mloDpI2aX9oueRmcHenANey8=",
+        "ref": "refs/heads/main",
+        "rev": "2c07552ae3581134b5f05c750ab600b04c8ceae9",
+        "revCount": 10,
+        "type": "git",
+        "url": "https://gitea.chiliahedron.wtf/chiliahedron/services-library"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://gitea.chiliahedron.wtf/chiliahedron/services-library"
       }
     }
   },
