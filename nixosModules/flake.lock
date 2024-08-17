@@ -18,23 +18,7 @@
     },
     "root": {
       "inputs": {
-        "nixpkgs": "nixpkgs",
-        "services-library": "services-library"
-      }
-    },
-    "services-library": {
-      "locked": {
-        "lastModified": 1723371292,
-        "narHash": "sha256-c8sveILXhUKz8sKbTT7mloDpI2aX9oueRmcHenANey8=",
-        "ref": "refs/heads/main",
-        "rev": "2c07552ae3581134b5f05c750ab600b04c8ceae9",
-        "revCount": 10,
-        "type": "git",
-        "url": "https://gitea.chiliahedron.wtf/chiliahedron/services-library"
-      },
-      "original": {
-        "type": "git",
-        "url": "https://gitea.chiliahedron.wtf/chiliahedron/services-library"
+        "nixpkgs": "nixpkgs"
       }
     }
   },
