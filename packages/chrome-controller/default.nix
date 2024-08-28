@@ -8,8 +8,8 @@ buildPythonPackage rec {
     domain = "gitea.chiliahedron.wtf";
     owner  = "john-craig";
     repo   = "smarthome-chrome-controller";
-    hash = "sha256-9uLEixfJjn0RbTzvwToNozkH05KXm9vKuxGhaswwyOY=";
-    rev = "50e3077b8718d62da867b0fa5c0df7f967c43a25";
+    hash = "sha256-fcOKPRshwo68YEni7M6bmPo7QccDrw52506yXEpcacw=";
+    rev = "d72bde25eadd870ecc18d99abe0d38637a86e713";
   };
 
   format = "pyproject";
@@ -18,8 +18,6 @@ buildPythonPackage rec {
     # ...
     setuptools
     click
-    ruamel-yaml
-    ruamel-yaml-clib
     (buildPythonPackage rec {
       pname = "PyChromeDevTools";
       version = "1.0.3";
@@ -27,6 +25,10 @@ buildPythonPackage rec {
         inherit pname version;
         hash = "sha256-pCmWi7GNNDItpO0bcnmA01+9gQTU52T20YULT/xuVjs=";
       };
+      propagatedBuildInputs = [
+        requests
+        websocket-client
+      ];
       doCheck = false;
     })
   ];
