@@ -32,6 +32,4 @@ buildPythonPackage rec {
       doCheck = false;
     })
   ];
-
-  # installPhase = "install -Dm755 ./obsidian-link-archiver.py $out/bin/obsidian-link-archiver";
 }
