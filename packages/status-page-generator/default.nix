@@ -9,7 +9,7 @@ buildPythonPackage rec {
     owner  = "john-craig";
     repo   = "status-generator";
     hash = "sha256-ZToT0WGtHQYcRbx36aEUnWjrgJDNyqfse/6zZ0RkAk8=";
-    rev = "31913bea07412dffb790731436bf616fa4881c9a";
+    rev = "b53e85231ec839fedb1fb1fb6b88d837454b8105";
   };
 
   format = "pyproject";
