@@ -3,8 +3,8 @@
     enable = lib.mkEnableOption "RSS Feed Triggers";
 
     triggers = lib.mkOption {
-      type = lib.types.listOf lib.types.attrset;
-
+      type = lib.types.listOf lib.types.attrs;
+    };
       # {
       #     name = "my-trigger";
       #     feed = "myfeed";
@@ -13,22 +13,20 @@
       #     exec = "myexecutable";
       #     calender = "mycal";
       # }
-    };
+    
   };
 
-  config = lib.mkIf config.services.rss-triggers.enable = {
+  config = lib.mkIf config.services.rss-triggers.enable {
     environment.systemPackages = [
       pkgs.rss-feed-trigger
     ];
 
-    systemd.services = (builtins.listToAttrs 
-      builtins.map (triggerDef: { 
-        name = "rss-trigger-${triggerDef.name}";
-        value = {
+    systemd.services = (lib.lists.foldl 
+      (acc: triggerDef: {
+        "rss-trigger-${triggerDef.name}" = {
           enable = true;
-
           script = ''
-            ${pkgs.rss-feed-trigger} ${triggerDef.feed} ${triggerDef.age} ${triggerDef.exec} -f ${lib.strings.concatStringsSep " " triggerDef.fields}
+            ${pkgs.rss-feed-trigger}/bin/rss-feed-trigger ${triggerDef.feed} ${triggerDef.age} ${triggerDef.exec} -f ${lib.strings.concatStringsSep " " triggerDef.fields}
           '';
 
           serviceConfig = {
@@ -36,20 +34,18 @@
             User = "root";
           };
         };
-      }
-    ) config.services.rss-triggers.triggers);
+      }) {} config.services.rss-triggers.triggers);
 
-    systemd.timers = (builtins.listToAttrs 
-      builtins.map (triggerDef: { 
-        name = "rss-trigger-${triggerDef.name}";
-        value = {
+    systemd.timers = (lib.lists.foldl 
+      (acc: triggerDef: {
+        "rss-trigger-${triggerDef.name}" = {
           wantedBy = [ "timers.target" ];
           timerConfig = {
-            OnCalendar = ${triggerDef.calender};
+            OnCalendar = "${triggerDef.calender}";
             Unit = "rss-trigger-${triggerDef.name}";
           };
         };
-      }
-    ) config.services.rss-triggers.triggers);
+      }) {} config.services.rss-triggers.triggers);
+
   };
 }
