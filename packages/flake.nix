@@ -18,6 +18,7 @@
       packages."x86_64-linux".rss-feed-trigger = pkgs.callPackage ./rss-feed-trigger {};
       packages."x86_64-linux".smartctl-ssacli-exporter = pkgs.callPackage ./smartctl-ssacli-exporter {};
       packages."x86_64-linux".hpssacli = pkgs.callPackage ./hpssacli {};
+      packages."x86_64-linux".self-updater = pkgs.callPackage ./self-updater {};
       packages."x86_64-linux".status-page-generator = pkgs.callPackage ./status-page-generator {};
 
       # Create overlay
@@ -29,6 +30,7 @@
         rss-feed-trigger = self.packages."x86_64-linux".rss-feed-trigger;
         smartctl-ssacli-exporter = self.packages."x86_64-linux".smartctl-ssacli-exporter;
         hpssacli = self.packages."x86_64-linux".hpssacli;
+        self-updater = self.packages."x86_64-linux".self-updater;
         status-page-generator = self.packages."x86_64-linux".status-page-generator;
       };
   };
