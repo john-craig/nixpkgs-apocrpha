@@ -42,7 +42,7 @@
           wantedBy = [ "timers.target" ];
           timerConfig = {
             OnCalendar = "${triggerDef.calender}";
-            Unit = "rss-trigger-${triggerDef.name}";
+            Unit = "rss-trigger-${triggerDef.name}.service";
           };
         };
       }) {} config.services.rss-triggers.triggers);

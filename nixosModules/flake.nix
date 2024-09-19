@@ -16,6 +16,10 @@
       smartctl-ssacli-exporter = {
         imports = [ ./smartctl-ssacli-exporter ];
       };
+
+      auto-updater = {
+        imports = [ ./auto-updater ];
+      };
     };
     
   };
