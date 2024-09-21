@@ -32,7 +32,7 @@
         fi
 
         # Add some utilities to the path
-        export PATH=$PATH:${pkgs.git}/bin:${pkgs.gnupg}/bin:${pkgs.nettools}/bin:${pkgs.nixos-rebuild}/bin
+        export PATH=$PATH:${pkgs.git}/bin:${pkgs.gnupg}/bin:${pkgs.nettools}/bin:${pkgs.nixos-rebuild}/bin:${pkgs.nix}:/bin
 
         # Extract commit hash
         COMMIT_HASH=$(echo $COMMIT_URL | cut -d '/' -f 7)    
