@@ -32,13 +32,13 @@
         fi
 
         # Add some utilities to the path
-        export PATH=$PATH:${pkgs.git}/bin:${pkgs.gnupg}/bin:${pkgs.nixos-rebuild}
+        export PATH=$PATH:${pkgs.git}/bin:${pkgs.gnupg}/bin:${pkgs.nettools}/bin:${pkgs.nixos-rebuild}/bin
 
         # Extract commit hash
         COMMIT_HASH=$(echo $COMMIT_URL | cut -d '/' -f 7)    
 
         # Set GnuPG directory
-        export GNUPGHOME=/sec/gnupg/$(hostname)/service/.gnupg
+        export GNUPGHOME=/sec/gnupg/$HOSTNAME/service/.gnupg
 
         # Invoke updater
         ${pkgs.self-updater}/bin/self-updater --commit $COMMIT_HASH $REPO_URL

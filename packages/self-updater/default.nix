@@ -9,8 +9,8 @@ buildPythonPackage rec {
     domain = "gitea.chiliahedron.wtf";
     owner  = "john-craig";
     repo   = "nixos-self-updater";
-    hash = "sha256-NXVXowpLJECweATBJH/QFKFZc0JkdAlyp9GdhpN5LhA=";
-    rev = "7c6e2137220bf05db8427c3b430c63e40bab4746";
+    hash = "sha256-eKg/F3xlThYUydz/gvd6hhD5wrHPA12VM8HcVs+lw6o=";
+    rev = "3a739412987cd5d9a5f5ce9913536dfc20209391";
   };
 
   format = "pyproject";
