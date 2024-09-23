@@ -8,8 +8,8 @@ buildPythonPackage rec {
     domain = "gitea.chiliahedron.wtf";
     owner  = "john-craig";
     repo   = "smarthome-chrome-controller";
-    hash = "sha256-fcOKPRshwo68YEni7M6bmPo7QccDrw52506yXEpcacw=";
-    rev = "d72bde25eadd870ecc18d99abe0d38637a86e713";
+    hash = "sha256-AW/XLL0vhgDj/UiVqMjEQDxgrglNPlGhAy+VPPcqC9w=";
+    rev = "f8ea90017f54acac87b10abcb9b9e671cc1382ce";
   };
 
   format = "pyproject";
