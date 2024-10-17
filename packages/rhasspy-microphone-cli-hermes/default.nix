@@ -33,12 +33,21 @@ buildPythonPackage {
 
   propagatedBuildInputs = [
     webrtcvad
-    paho-mqtt
-
+    
     setuptools
     dataclasses-json
     audioread
     soundfile
+
+    (buildPythonPackage rec {
+      pname = "paho-mqtt";
+      version = "1.5.0";
+      src = fetchPypi {
+        inherit pname version;
+        hash = "sha256-49KGGYuq6hlcizvCIZQdJaOrDhUH/Bd5vbdHOAY5S+Q=";
+      };
+      doCheck = false;
+    })
 
     (buildPythonPackage rec {
       pname = "rhasspy-hermes";
