@@ -12,6 +12,7 @@
       pkgs = import nixpkgs { inherit system; config.allowUnfree = true; };
     in {
       packages."x86_64-linux".chrome-controller = pkgs.callPackage ./chrome-controller {};
+      packages."x86_64-linux".dev-journal-builder = pkgs.callPackage ./dev-journal-builder {};
       packages."x86_64-linux".rhasspy-microphone-cli-hermes = pkgs.callPackage ./rhasspy-microphone-cli-hermes {};
       packages."x86_64-linux".rhasspy-speakers-cli-hermes = pkgs.callPackage ./rhasspy-speakers-cli-hermes {};
       packages."x86_64-linux".obsidian-link-archiver = pkgs.callPackage ./obsidian-link-archiver {};
@@ -24,6 +25,7 @@
       # Create overlay
       overlays.default = final: prev: {
         chrome-controller = self.packages."x86_64-linux".chrome-controller;
+        dev-journal-builder = self.packages."x86_64-linux".dev-journal-builder;
         rhasspy-microphone-cli-hermes = self.packages."x86_64-linux".rhasspy-microphone-cli-hermes;
         rhasspy-speakers-cli-hermes = self.packages."x86_64-linux".rhasspy-speakers-cli-hermes;
         obsidian-link-archiver = self.packages."x86_64-linux".obsidian-link-archiver;
