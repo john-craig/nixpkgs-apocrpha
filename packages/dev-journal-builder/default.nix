@@ -39,8 +39,8 @@ buildPythonPackage rec {
         domain = "gitea.chiliahedron.wtf";
         owner  = "john-craig";
         repo   = "archivebox-utils";
-        hash = "sha256-wDoRVrCSIBV0/uZ8NRfjtU7i2wY+ml8XVcx+DijwqS8=";
-        rev = "94e45f4608fb279090432effd78777db59ea9f4e";
+        hash = "sha256-Qraol4XJqm8g5ZUZcHUSS300/kkI4K63sKBRU2ut2wM=";
+        rev = "5f29e19d4bd73fc521ce7ef56883678d4e3e01de";
       };
       version = "0.1.0";
       propagatedBuildInputs = [
