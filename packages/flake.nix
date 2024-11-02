@@ -12,6 +12,7 @@
       pkgs = import nixpkgs { inherit system; config.allowUnfree = true; };
     in {
       packages."x86_64-linux".chrome-controller = pkgs.callPackage ./chrome-controller {};
+      packages."x86_64-linux".dismas = pkgs.callPackage ./dismas {};
       packages."x86_64-linux".dev-journal-builder = pkgs.callPackage ./dev-journal-builder {};
       packages."x86_64-linux".faustroll = pkgs.callPackage ./faustroll {};
       packages."x86_64-linux".rhasspy-microphone-cli-hermes = pkgs.callPackage ./rhasspy-microphone-cli-hermes {};
@@ -27,6 +28,7 @@
       # Create overlay
       overlays.default = final: prev: {
         chrome-controller = self.packages."x86_64-linux".chrome-controller;
+        dismas = self.packages."x86_64-linux".dismas;
         dev-journal-builder = self.packages."x86_64-linux".dev-journal-builder;
         faustroll = self.packages."x86_64-linux".faustroll;
         rhasspy-microphone-cli-hermes = self.packages."x86_64-linux".rhasspy-microphone-cli-hermes;
