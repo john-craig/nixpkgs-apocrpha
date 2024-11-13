@@ -10,36 +10,24 @@
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs { inherit system; config.allowUnfree = true; };
-    in {
-      packages."x86_64-linux".chrome-controller = pkgs.callPackage ./chrome-controller {};
-      packages."x86_64-linux".dismas = pkgs.callPackage ./dismas {};
-      packages."x86_64-linux".dev-journal-builder = pkgs.callPackage ./dev-journal-builder {};
-      packages."x86_64-linux".faustroll = pkgs.callPackage ./faustroll {};
-      packages."x86_64-linux".rhasspy-microphone-cli-hermes = pkgs.callPackage ./rhasspy-microphone-cli-hermes {};
-      packages."x86_64-linux".rhasspy-speakers-cli-hermes = pkgs.callPackage ./rhasspy-speakers-cli-hermes {};
-      packages."x86_64-linux".obsidian-link-archiver = pkgs.callPackage ./obsidian-link-archiver {};
-      packages."x86_64-linux".panmuphle = pkgs.callPackage ./panmuphle {};
-      packages."x86_64-linux".rss-feed-trigger = pkgs.callPackage ./rss-feed-trigger {};
-      packages."x86_64-linux".smartctl-ssacli-exporter = pkgs.callPackage ./smartctl-ssacli-exporter {};
-      packages."x86_64-linux".hpssacli = pkgs.callPackage ./hpssacli {};
-      packages."x86_64-linux".self-updater = pkgs.callPackage ./self-updater {};
-      packages."x86_64-linux".status-page-generator = pkgs.callPackage ./status-page-generator {};
+        # Path to the directory containing package subdirectories (adjust as necessary)
+        packageDir = ./.;
 
-      # Create overlay
-      overlays.default = final: prev: {
-        chrome-controller = self.packages."x86_64-linux".chrome-controller;
-        dismas = self.packages."x86_64-linux".dismas;
-        dev-journal-builder = self.packages."x86_64-linux".dev-journal-builder;
-        faustroll = self.packages."x86_64-linux".faustroll;
-        rhasspy-microphone-cli-hermes = self.packages."x86_64-linux".rhasspy-microphone-cli-hermes;
-        rhasspy-speakers-cli-hermes = self.packages."x86_64-linux".rhasspy-speakers-cli-hermes;
-        obsidian-link-archiver = self.packages."x86_64-linux".obsidian-link-archiver;
-        panmuphle = self.packages."x86_64-linux".panmuphle;
-        rss-feed-trigger = self.packages."x86_64-linux".rss-feed-trigger;
-        smartctl-ssacli-exporter = self.packages."x86_64-linux".smartctl-ssacli-exporter;
-        hpssacli = self.packages."x86_64-linux".hpssacli;
-        self-updater = self.packages."x86_64-linux".self-updater;
-        status-page-generator = self.packages."x86_64-linux".status-page-generator;
-      };
+        # Get a list of directories in packageDir
+        packageNames = builtins.filter (x: x != "." && x != "..") (nixpkgs.lib.attrsets.mapAttrsToList (name: value: name) (builtins.readDir packageDir));
+
+        
+        callPackageFor = name: pkgs.callPackage ./${name} {};
+        createOverlay = name: self.packages."x86_64-linux".${name};
+    in {
+      packages."x86_64-linux" = builtins.listToAttrs (map (name: {
+        name = name;
+        value = callPackageFor name;
+      }) packageNames);
+
+      overlays.default = final: prev: builtins.listToAttrs (map (name: {
+        name = name;
+        value = createOverlay name;
+      }) packageNames);
   };
 }
