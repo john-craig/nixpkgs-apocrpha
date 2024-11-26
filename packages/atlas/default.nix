@@ -8,7 +8,7 @@ buildGoModule rec {
     domain = "gitea.chiliahedron.wtf";
     owner  = "john-craig";
     repo   = "atlas";
-    hash = "sha256-nbVzLd6vQE13+2GVWEB9nxhCziKgWnXAR/4QffsLxiA=";
-    rev = "400b98439372d6db994c45b8c245f9e31219bb20";
+    hash = "sha256-BpRokrbEYC4G4ZoXOKFQFxAI+V6F0Y/uBjGmVkawz+4=";
+    rev = "32b85533117190d2c027d9e4d8366256e33aa2d9";
   };
 }
