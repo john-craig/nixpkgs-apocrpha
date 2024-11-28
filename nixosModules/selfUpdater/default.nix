@@ -1,11 +1,30 @@
 { pkgs, lib, config, ... }: {
   options.selfUpdater = {
     enable = lib.mkEnableOption "Self Updater";
+
+    hostname = lib.mkOption {
+      type = lib.types.str;
+      default = config.networking.hostName;
+      description = "Hostname of the system to build";
+    };
+
+    flakeUri = lib.mkOption {
+      type = lib.types.str;
+      default = "git+https://gitea.chiliahedron.wtf/chiliahedron/homelab-configurations";
+      description = "The flake URI to build from";
+    };
+
+    extraArgs = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [];
+      description = "Extra arguments to pass to nixos-rebuild";
+    };
   };
 
   config = lib.mkIf config.selfUpdater.enable {
     environment.systemPackages = [
       pkgs.nixos-rebuild
+      pkgs.git
     ];
 
     users.groups."updater" = {};
@@ -23,20 +42,24 @@
     ];
 
     systemd.services."updateSelf" = let
-      updateSelfScript = pkgs.writeShellScript "updateSelfScript" ''
-        HOMELAB_CONFIGURATIONS=https://gitea.chiliahedron.wtf/chiliahedron/homelab-configurations
-        TARGET_HOST=$(hostname)
+      hostname = config.selfUpdater.hostname;
+      flakeUri = config.selfUpdater.flakeUri;
+      extraArgs = lib.strings.concatStringsSep " " config.selfUpdater.extraArgs;
 
-        sudo nixos-rebuild switch --flake "$HOMELAB_CONFIGURATIONS#$TARGET_HOST"
+      updateSelfScript = pkgs.writeShellScript "updateSelfScript" ''
+        /run/wrappers/bin/sudo nixos-rebuild switch --flake ${flakeUri}#${hostname} ${extraArgs}
       '';
     in {
       enable = true;
+      path = [ pkgs.nixos-rebuild pkgs.git ];
       script = "${updateSelfScript}";
-      path = [ pkgs.curl pkgs.nixos-rebuild ];
 
       serviceConfig = {
         Type = "oneshot";
         User = "updater";
+
+        PrivateTmp = true;
+        WorkingDirectory = /tmp;
       };
     };
   };
