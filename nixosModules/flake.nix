@@ -20,6 +20,10 @@
       auto-updater = {
         imports = [ ./auto-updater ];
       };
+
+      selfUpdater = {
+        imports = [ ./selfUpdater ];
+      };
     };
     
   };
