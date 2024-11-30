@@ -33,34 +33,34 @@
     {
       "hosts": [
         {
-          hostname = "DD-WRT",
-          ipAddress = "192.168.1.1",
-          macAddress = "38:94:ED:6D:E0:9A"
+          "hostname": "DD-WRT",
+          "ipAddress": "192.168.1.1",
+          "macAddress": "38:94:ED:6D:E0:9A"
         },
         {
-          hostname = "key_server",
-          ipAddress = "192.168.1.3",
-          macAddress = "DC:A6:32:10:4D:EC"
+          "hostname": "key_server",
+          "ipAddress": "192.168.1.3",
+          "macAddress": "DC:A6:32:10:4D:EC"
         },
         {
-          hostname = "pxe_server",
-          ipAddress = "192.168.1.5"
-          macAddress = "DC:A6:32:8F:2F:B8"
+          "hostname": "pxe_server",
+          "ipAddress": "192.168.1.5",
+          "macAddress": "DC:A6:32:8F:2F:B8"
         },
         {
-          hostname = "homeserver1",
-          ipAddress = "192.168.1.8",
-          macAddress = "80:C1:6E:21:F5:CC"
+          "hostname": "homeserver1",
+          "ipAddress": "192.168.1.8",
+          "macAddress": "80:C1:6E:21:F5:CC"
         },
         {
-          hostname = "laptop-wifi",
-          ipAddress = "192.168.1.64",
-          macAddress = "E4:B3:18:D9:44:3C"
+          "hostname": "laptop-wifi",
+          "ipAddress": "192.168.1.64",
+          "macAddress": "E4:B3:18:D9:44:3C"
         },
         {
-          hostname = "media_kiosk",
-          ipAddress = "192.168.1.96",
-          macAddress = "68:1D:EF:F0:00:0F"
+          "hostname": "media_kiosk",
+          "ipAddress": "192.168.1.96",
+          "macAddress": "68:1D:EF:F0:00:0F"
         }
       ]
     }
@@ -70,8 +70,8 @@
       {
         users = [ "updater" ];
         commands = [ 
-          { command = "${pkgs.nixos-rebuild}/bin/alucard"; options = [ "NOPASSWD" ]; }
-          { command = "${pkgs.nixos-rebuild}/bin/nixos-rebuild"; options = [ "NOPASSWD" ]; }
+          { command = "${pkgs.alucard}/bin/alucard"; options = [ "NOPASSWD" "SETENV" ]; }
+          { command = "${pkgs.nixos-rebuild}/bin/nixos-rebuild"; options = [ "NOPASSWD" "SETENV" ]; }
         ];
       }
     ];
@@ -89,7 +89,7 @@
         Type = "oneshot";
         User = "updater";
 
-        ExecStart = "/run/wrappers/bin/sudo alucard deploy host --flake ${flakeUri} localhost";
+        ExecStart = "/run/wrappers/bin/sudo -E alucard deploy host --flake ${flakeUri} --sudo-path '/run/wrappers/bin/sudo' localhost";
 
         PrivateTmp = true;
         WorkingDirectory = /tmp;
