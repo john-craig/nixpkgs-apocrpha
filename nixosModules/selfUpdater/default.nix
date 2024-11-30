@@ -16,11 +16,6 @@
   };
 
   config = lib.mkIf config.selfUpdater.enable {
-    environment.systemPackages = [
-      pkgs.nixos-rebuild
-      pkgs.git
-    ];
-
     users.groups."updater" = {};
 
     users.users."updater" = {
@@ -28,25 +23,73 @@
       group = "updater";
     };
 
+    environment.systemPackages = [
+      pkgs.alucard
+      pkgs.nixos-rebuild
+      pkgs.git
+    ];
+
+    environment.etc."alucard/host-config.json".text = ''
+    {
+      "hosts": [
+        {
+          hostname = "DD-WRT",
+          ipAddress = "192.168.1.1",
+          macAddress = "38:94:ED:6D:E0:9A"
+        },
+        {
+          hostname = "key_server",
+          ipAddress = "192.168.1.3",
+          macAddress = "DC:A6:32:10:4D:EC"
+        },
+        {
+          hostname = "pxe_server",
+          ipAddress = "192.168.1.5"
+          macAddress = "DC:A6:32:8F:2F:B8"
+        },
+        {
+          hostname = "homeserver1",
+          ipAddress = "192.168.1.8",
+          macAddress = "80:C1:6E:21:F5:CC"
+        },
+        {
+          hostname = "laptop-wifi",
+          ipAddress = "192.168.1.64",
+          macAddress = "E4:B3:18:D9:44:3C"
+        },
+        {
+          hostname = "media_kiosk",
+          ipAddress = "192.168.1.96",
+          macAddress = "68:1D:EF:F0:00:0F"
+        }
+      ]
+    }
+    '';
+
     security.sudo.extraRules = [
       {
         users = [ "updater" ];
-        commands = [ { command = "${pkgs.nixos-rebuild}/bin/nixos-rebuild"; options = [ "NOPASSWD" ]; } ];
+        commands = [ 
+          { command = "${pkgs.nixos-rebuild}/bin/alucard"; options = [ "NOPASSWD" ]; }
+          { command = "${pkgs.nixos-rebuild}/bin/nixos-rebuild"; options = [ "NOPASSWD" ]; }
+        ];
       }
     ];
 
-    systemd.services."updateSelf@" = let
-      hostname = config.selfUpdater.hostname;
+    systemd.services."updateSelf" = let
       flakeUri = config.selfUpdater.flakeUri;
       extraArgs = lib.strings.concatStringsSep " " config.selfUpdater.extraArgs;
     in {
       enable = true;
-      path = [ pkgs.nixos-rebuild pkgs.git ];
+      path = [ pkgs.alucard pkgs.nixos-rebuild pkgs.git ];
+      environment = {
+        ALUCARD_HOST_CONFIG="/etc/alucard/host-config.json";
+      };
       serviceConfig = {
         Type = "oneshot";
         User = "updater";
 
-        ExecStart = "/run/wrappers/bin/sudo nixos-rebuild switch --flake ${flakeUri}#%i ${extraArgs}";
+        ExecStart = "/run/wrappers/bin/sudo alucard deploy host --flake ${flakeUri} localhost";
 
         PrivateTmp = true;
         WorkingDirectory = /tmp;
