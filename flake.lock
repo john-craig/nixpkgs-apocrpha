@@ -7,11 +7,11 @@
       "locked": {
         "lastModified": 1,
         "narHash": "sha256-o6KY5m51s8yPiyRQu1myvoii1t8Vydd20PBgeFgvfME=",
-        "path": "/nix/store/yz9790vvifgg9b7m7i5inkzwc2p9hkb6-source/nixosModules",
+        "path": "/nix/store/fpa18bjxw1db8sfr0ww54fdgxlb6cym2-source/nixosModules",
         "type": "path"
       },
       "original": {
-        "path": "/nix/store/yz9790vvifgg9b7m7i5inkzwc2p9hkb6-source/nixosModules",
+        "path": "/nix/store/fpa18bjxw1db8sfr0ww54fdgxlb6cym2-source/nixosModules",
         "type": "path"
       }
     },
@@ -24,12 +24,12 @@
       },
       "locked": {
         "lastModified": 1,
-        "narHash": "sha256-Qc/DOn1YGOzH10GT0X/lkdCM/R8V/yd0IiZKPo8+Fdo=",
-        "path": "/nix/store/yz9790vvifgg9b7m7i5inkzwc2p9hkb6-source/packages",
+        "narHash": "sha256-sy+iDII4CjeSLtMO+3BAoO2SYr78P9gXMNRlJlx0PDs=",
+        "path": "/nix/store/fpa18bjxw1db8sfr0ww54fdgxlb6cym2-source/packages",
         "type": "path"
       },
       "original": {
-        "path": "/nix/store/yz9790vvifgg9b7m7i5inkzwc2p9hkb6-source/packages",
+        "path": "/nix/store/fpa18bjxw1db8sfr0ww54fdgxlb6cym2-source/packages",
         "type": "path"
       }
     },
@@ -42,11 +42,11 @@
       "locked": {
         "lastModified": 1,
         "narHash": "sha256-B7fMLvkoNYsMlbrfeqIGW7ojHwNhW5B159OJbsg7D3k=",
-        "path": "/nix/store/yz9790vvifgg9b7m7i5inkzwc2p9hkb6-source/utilities",
+        "path": "/nix/store/fpa18bjxw1db8sfr0ww54fdgxlb6cym2-source/utilities",
         "type": "path"
       },
       "original": {
-        "path": "/nix/store/yz9790vvifgg9b7m7i5inkzwc2p9hkb6-source/utilities",
+        "path": "/nix/store/fpa18bjxw1db8sfr0ww54fdgxlb6cym2-source/utilities",
         "type": "path"
       }
     },
