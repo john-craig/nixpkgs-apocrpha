@@ -13,7 +13,7 @@
           DISPLAY_DATE=$(date)
           curl -s -S --data '{"message": "'"${message}"'", "title": "'"${title}"'", "priority":'"1"', "extras": {"client::display": {"contentType": "text/markdown"}}}' -H 'Content-Type: application/json' "https://gotify.chiliahedron.wtf/message?token=$GOTIFY_TOKEN"
         '';
-      
+
       mkNotifiedService = serviceName: serviceDef: tokenPath: (
         {
           "${serviceName}" = (
@@ -36,7 +36,7 @@
           "${serviceName}-failure-notifier" = {
             enable = true;
             path = [ nixpkgs.pkgs.curl ];
-            script = mkNotifierScript  ("${serviceName} Failed"
+            script = mkNotifierScript ("${serviceName} Failed"
               "${serviceName} failed on $DISPLAY_DATE"
               tokenPath);
             serviceConfig = {
@@ -49,5 +49,5 @@
 
     };
   };
-    
+
 }

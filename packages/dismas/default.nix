@@ -1,4 +1,4 @@
-{ pkgs, lib, fetchFromGitea } :
+{ pkgs, lib, fetchFromGitea }:
 
 with pkgs.python311Packages;
 buildPythonPackage rec {
@@ -6,14 +6,14 @@ buildPythonPackage rec {
 
   src = fetchFromGitea {
     domain = "gitea.chiliahedron.wtf";
-    owner  = "john-craig";
-    repo   = "dismas";
+    owner = "john-craig";
+    repo = "dismas";
     hash = "sha256-s2BofXMHY3BZRFwMJmRt+/ruKvL7x1xJ6WhNgIup1Ws=";
     rev = "875a1891181b42d19599455481397dfd5016948a";
   };
 
   format = "pyproject";
-  
+
   propagatedBuildInputs = [
     # ...
     setuptools
@@ -23,8 +23,8 @@ buildPythonPackage rec {
       pname = "obsidian-utils";
       src = fetchFromGitea {
         domain = "gitea.chiliahedron.wtf";
-        owner  = "john-craig";
-        repo   = "obsidian-utils";
+        owner = "john-craig";
+        repo = "obsidian-utils";
         hash = "sha256-ZfujMlWs/IVITmVHvUJeazwPx43OxuVn1FXQ694RtiM=";
         rev = "96ed4b9f0aea319046a832f766d457b88a63ceef";
       };

@@ -5,15 +5,15 @@
     triggers = lib.mkOption {
       type = lib.types.listOf lib.types.attrs;
     };
-      # {
-      #     name = "my-trigger";
-      #     feed = "myfeed";
-      #     age = "5h" or "last";
-      #     fields = [ "myfield1" "myfield2" ];
-      #     exec = "myexecutable";
-      #     calender = "mycal";
-      # }
-    
+    # {
+    #     name = "my-trigger";
+    #     feed = "myfeed";
+    #     age = "5h" or "last";
+    #     fields = [ "myfield1" "myfield2" ];
+    #     exec = "myexecutable";
+    #     calender = "mycal";
+    # }
+
   };
 
   config = lib.mkIf config.services.rss-triggers.enable {
@@ -21,7 +21,7 @@
       pkgs.rss-feed-trigger
     ];
 
-    systemd.services = (lib.lists.foldl 
+    systemd.services = (lib.lists.foldl
       (acc: triggerDef: {
         "rss-trigger-${triggerDef.name}" = {
           enable = true;
@@ -34,9 +34,11 @@
             User = "root";
           };
         };
-      }) {} config.services.rss-triggers.triggers);
+      })
+      { }
+      config.services.rss-triggers.triggers);
 
-    systemd.timers = (lib.lists.foldl 
+    systemd.timers = (lib.lists.foldl
       (acc: triggerDef: {
         "rss-trigger-${triggerDef.name}" = {
           wantedBy = [ "timers.target" ];
@@ -45,7 +47,9 @@
             Unit = "rss-trigger-${triggerDef.name}.service";
           };
         };
-      }) {} config.services.rss-triggers.triggers);
+      })
+      { }
+      config.services.rss-triggers.triggers);
 
   };
 }

@@ -18,44 +18,46 @@
       enableSSHSupport = true;
     };
 
-    services.rss-triggers = let
-      updater-exec = pkgs.writeShellScript "updater-exec" ''
-        # Set commit URL
-        COMMIT_URL=$1
-        REPO_URL="https://gitea.chiliahedron.wtf/chiliahedron/homelab-configurations"
+    services.rss-triggers =
+      let
+        updater-exec = pkgs.writeShellScript "updater-exec" ''
+          # Set commit URL
+          COMMIT_URL=$1
+          REPO_URL="https://gitea.chiliahedron.wtf/chiliahedron/homelab-configurations"
 
-        if [[ $COMMIT_URL == $REPO_URL* ]]; then
-          :
-        else
-          echo "Invalid commit URL: $COMMIT_URL"
-          exit 0
-        fi
+          if [[ $COMMIT_URL == $REPO_URL* ]]; then
+            :
+          else
+            echo "Invalid commit URL: $COMMIT_URL"
+            exit 0
+          fi
 
-        # Add some utilities to the path
-        export PATH=$PATH:${pkgs.git}/bin:${pkgs.gnupg}/bin:${pkgs.nettools}/bin:${pkgs.nixos-rebuild}/bin:${pkgs.nix}:/bin
+          # Add some utilities to the path
+          export PATH=$PATH:${pkgs.git}/bin:${pkgs.gnupg}/bin:${pkgs.nettools}/bin:${pkgs.nixos-rebuild}/bin:${pkgs.nix}:/bin
 
-        # Extract commit hash
-        COMMIT_HASH=$(echo $COMMIT_URL | cut -d '/' -f 7)    
+          # Extract commit hash
+          COMMIT_HASH=$(echo $COMMIT_URL | cut -d '/' -f 7)    
 
-        # Set GnuPG directory
-        export GNUPGHOME=/sec/gnupg/$HOSTNAME/service/.gnupg
+          # Set GnuPG directory
+          export GNUPGHOME=/sec/gnupg/$HOSTNAME/service/.gnupg
 
-        # Invoke updater
-        ${pkgs.self-updater}/bin/self-updater --commit $COMMIT_HASH $REPO_URL
-      '';
-    in {
-      enable = true;
-      triggers = [
-        {
-          name = "homelab-configuration";
-          feed = "https://gitea.chiliahedron.wtf/chiliahedron/homelab-configurations.rss";
-          age  = "1h";
-          fields = [ "link" ];
-          exec = "${updater-exec}";
-          calender = "hourly";
-        }
-      ];
-    };
+          # Invoke updater
+          ${pkgs.self-updater}/bin/self-updater --commit $COMMIT_HASH $REPO_URL
+        '';
+      in
+      {
+        enable = true;
+        triggers = [
+          {
+            name = "homelab-configuration";
+            feed = "https://gitea.chiliahedron.wtf/chiliahedron/homelab-configurations.rss";
+            age = "1h";
+            fields = [ "link" ];
+            exec = "${updater-exec}";
+            calender = "hourly";
+          }
+        ];
+      };
 
   };
 }

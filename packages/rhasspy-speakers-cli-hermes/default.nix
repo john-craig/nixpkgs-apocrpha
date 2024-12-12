@@ -1,4 +1,4 @@
-{ pkgs, fetchFromGitHub, autoconf, automake } :
+{ pkgs, fetchFromGitHub, autoconf, automake }:
 
 with pkgs.python311Packages;
 buildPythonPackage {
@@ -6,8 +6,8 @@ buildPythonPackage {
   version = "v0.2.0";
 
   src = fetchFromGitHub {
-    owner  = "rotdrop";
-    repo   = "rhasspy-speakers-cli-hermes";
+    owner = "rotdrop";
+    repo = "rhasspy-speakers-cli-hermes";
     rev = "8abd3a60e42119f1a509e27bb20d6bd136188e78";
     hash = "sha256-VYoklRVGeyQpTH5MummwUNkvrsc9yNGBLvqIzp5lbv0=";
   };
@@ -24,9 +24,9 @@ buildPythonPackage {
 
   doCheck = false;
 
-    buildInputs = [ 
-    autoconf 
-    automake 
+  buildInputs = [
+    autoconf
+    automake
     pip
     virtualenv
   ];

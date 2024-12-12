@@ -1,4 +1,4 @@
-{ pkgs, lib, fetchFromGitea } :
+{ pkgs, lib, fetchFromGitea }:
 
 with pkgs.python311Packages;
 buildPythonPackage rec {
@@ -6,14 +6,14 @@ buildPythonPackage rec {
 
   src = fetchFromGitea {
     domain = "gitea.chiliahedron.wtf";
-    owner  = "";
-    repo   = "";
+    owner = "";
+    repo = "";
     hash = lib.fakeHash;
     rev = "";
   };
 
   format = "pyproject";
-  
+
   propagatedBuildInputs = [
     # ...
     setuptools

@@ -35,7 +35,7 @@ in
       '';
     };
   };
-  
+
   config = mkIf cfg.enable {
     assertions = [
       {
@@ -56,7 +56,7 @@ in
     ];
 
     users.groups = {
-      "${servGroup}" = {};
+      "${servGroup}" = { };
     };
 
     users.users."${servUser}" = {
@@ -89,7 +89,7 @@ in
           -smartctl.path ${pkgs.smartmontools}/bin/smartctl -ssacli.path ${pkgs.hpssacli}/bin/hpssacli \
           -lsscsi.path ${pkgs.lsscsi}/bin/lsscsi -sudo.path /run/wrappers/bin/sudo
       '';
-      
+
       # Needed for `hpssacli` and `smartctl` to execute correctly
       serviceConfig.PrivateDevices = false;
       serviceConfig.ProtectKernelModules = false;

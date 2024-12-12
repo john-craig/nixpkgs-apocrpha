@@ -1,4 +1,4 @@
-{ pkgs, lib, config, utils, ... }: 
+{ pkgs, lib, config, utils, ... }:
 
 with utils;
 
@@ -9,7 +9,7 @@ let
       DISPLAY_DATE=$(date)
       curl -s -S --data '{"message": "'"${message}"'", "title": "'"${title}"'", "priority":'"1"', "extras": {"client::display": {"contentType": "text/markdown"}}}' -H 'Content-Type: application/json' "${gotifyUrl}/message?token=$GOTIFY_TOKEN"
     '';
-      
+
   mkNotifiedService = serviceName: serviceDef: mkNotifierScript: (
     {
       "${serviceName}" = (
@@ -21,7 +21,7 @@ let
       "${serviceName}-success-notifier" = {
         enable = true;
         path = [ pkgs.curl ];
-        script = (mkNotifierScript 
+        script = (mkNotifierScript
           "${serviceName} Succeeded"
           "${serviceName} succeeded on $DISPLAY_DATE");
         serviceConfig = {
@@ -32,7 +32,7 @@ let
       "${serviceName}-failure-notifier" = {
         enable = true;
         path = [ pkgs.curl ];
-        script = (mkNotifierScript 
+        script = (mkNotifierScript
           "${serviceName} Failed"
           "${serviceName} failed on $DISPLAY_DATE");
         serviceConfig = {
@@ -41,13 +41,14 @@ let
         };
       };
     });
-in {
+in
+{
   options.notifiedServices = {
     enable = lib.mkEnableOption "Notified Services";
 
     method = lib.mkOption {
       description = "Notification method";
-      
+
       type = lib.types.submodule {
         options = {
           # Only supported option
@@ -71,9 +72,9 @@ in {
         };
       };
     };
-    
+
     services = lib.mkOption {
-      default = {};
+      default = { };
       type = lib.types.attrs;
       # type = systemdUtils.types.services;
       description = "Definition of systemd service units; see {manpage}`systemd.service(5)`.";
@@ -92,14 +93,17 @@ in {
       pkgs.curl
     ];
 
-    systemd.services = let 
-      mkNotifierScript = (title: message:
-        (mkGotifyNotifierScript title message 
-          config.notifiedServices.method.gotify.tokenPath
-          config.notifiedServices.method.gotify.url));
-    in
-      lib.attrsets.foldlAttrs (acc: servName: servDef:
-        acc // (mkNotifiedService servName servDef mkNotifierScript))
-        {} config.notifiedServices.services;
+    systemd.services =
+      let
+        mkNotifierScript = (title: message:
+          (mkGotifyNotifierScript title message
+            config.notifiedServices.method.gotify.tokenPath
+            config.notifiedServices.method.gotify.url));
+      in
+      lib.attrsets.foldlAttrs
+        (acc: servName: servDef:
+          acc // (mkNotifiedService servName servDef mkNotifierScript))
+        { }
+        config.notifiedServices.services;
   };
 }

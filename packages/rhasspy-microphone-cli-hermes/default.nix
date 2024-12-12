@@ -1,4 +1,4 @@
-{ pkgs, fetchFromGitHub, autoconf, automake } :
+{ pkgs, fetchFromGitHub, autoconf, automake }:
 
 with pkgs.python311Packages;
 buildPythonPackage {
@@ -6,8 +6,8 @@ buildPythonPackage {
   version = "v0.2.0";
 
   src = fetchFromGitHub {
-    owner  = "rotdrop";
-    repo   = "rhasspy-microphone-cli-hermes";
+    owner = "rotdrop";
+    repo = "rhasspy-microphone-cli-hermes";
     rev = "d6095823fa9218b1bbc639cfc3e6ce88c3f14dea";
     hash = "sha256-yViO54LncUueRRW/lR/4+RMq04ikOAryY+lwYbNN1ag=";
   };
@@ -24,16 +24,16 @@ buildPythonPackage {
 
   doCheck = false;
 
-  buildInputs = [ 
-    autoconf 
-    automake 
+  buildInputs = [
+    autoconf
+    automake
     pip
     virtualenv
   ];
 
   propagatedBuildInputs = [
     webrtcvad
-    
+
     setuptools
     dataclasses-json
     audioread
