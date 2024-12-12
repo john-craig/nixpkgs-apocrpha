@@ -24,6 +24,10 @@
       selfUpdater = {
         imports = [ ./selfUpdater ];
       };
+
+      notifiedServices = {
+        imports = [ ./notifiedServices ];
+      };
     };
     
   };

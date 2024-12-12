@@ -17,7 +17,8 @@
 
     nixosModules = apocryphalNixosModules.nixosModules;
     packages = apocryphalPackages.packages;
-    overlays = apocryphalPackages.overlays // apocryphalUtilities.overlays;
+    overlays = apocryphalPackages.overlays;
+    utilities = apocryphalUtilities.utilities;
   };
 }
 
