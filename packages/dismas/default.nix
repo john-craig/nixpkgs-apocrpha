@@ -1,4 +1,4 @@
-{ pkgs, lib, fetchFromGitea }:
+{ pkgs, lib, fetchFromGitea, fetchFromGitHub }:
 
 with pkgs.python311Packages;
 buildPythonPackage rec {
@@ -8,8 +8,8 @@ buildPythonPackage rec {
     domain = "gitea.chiliahedron.wtf";
     owner = "john-craig";
     repo = "dismas";
-    hash = "sha256-5M279/8MZqVv0wlojwmRmEJ+SV4jSOBbFWsYaB1CfgM=";
-    rev = "31342929f965e1dbd7df4064123a42370bc66e8f";
+    hash = "sha256-UFl7Cuhl3G+8v/MVslfP6KVag2vOYD9u2kT7OCW+DL8=";
+    rev = "bfe1af427ce34770e7d1193c6a1dc3892fdd516a";
   };
 
   format = "pyproject";
@@ -29,6 +29,21 @@ buildPythonPackage rec {
         rev = "96ed4b9f0aea319046a832f766d457b88a63ceef";
       };
       version = "0.1.0";
+      propagatedBuildInputs = [
+        setuptools
+      ];
+
+      format = "pyproject";
+    })
+    (buildPythonPackage rec {
+      pname = "python-deepcompare";
+      src = fetchFromGitHub {
+        owner = "anexia";
+        repo = "python-deepcompare";
+        hash = "sha256-SZLedPKb6WghIymT5VQH4CnkJ225TNiqfUtxZmtJ3OM=";
+        rev = "6021801b1673eff763c53c4c243936911ae25891";
+      };
+      version = "2.1.0";
       propagatedBuildInputs = [
         setuptools
       ];
