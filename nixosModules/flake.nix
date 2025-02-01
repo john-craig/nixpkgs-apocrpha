@@ -28,6 +28,10 @@
       notifiedServices = {
         imports = [ ./notifiedServices ];
       };
+
+      writingTracker = {
+        imports = [ ./writingTracker ];
+      };
     };
 
   };
