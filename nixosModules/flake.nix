@@ -29,6 +29,10 @@
         imports = [ ./notifiedServices ];
       };
 
+      timeTracker = {
+        imports = [ ./timeTracker ];
+      };
+
       writingTracker = {
         imports = [ ./writingTracker ];
       };
