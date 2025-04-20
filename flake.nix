@@ -4,17 +4,16 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
 
-    apocryphalPackages.url = "./packages";
-    apocryphalPackages.inputs.nixpkgs.follows = "nixpkgs";
-
-    apocryphalUtilities.url = "./utilities";
-    apocryphalUtilities.inputs.nixpkgs.follows = "nixpkgs";
-
-    apocryphalNixosModules.url = "./nixosModules";
+    flake-utils = {
+      url = "github:numtide/flake-utils";
+    };
   };
 
-  outputs = { self, nixpkgs, apocryphalPackages, apocryphalUtilities, apocryphalNixosModules }: {
-
+  outputs = { self, nixpkgs, flake-utils }: let
+    apocryphalNixosModules = import ./nixosModules;
+    apocryphalPackages = import ./packages { inherit nixpkgs flake-utils; };
+    apocryphalUtilities = import ./utilities;
+  in {
     nixosModules = apocryphalNixosModules.nixosModules;
     packages = apocryphalPackages.packages;
     overlays = apocryphalPackages.overlays;
