@@ -11,7 +11,7 @@
     in
     pkgs.callPackage ./${name} { };
 
-  createOverlay = name: system: packages: packages.${system}.${name};
+  createOverlay = name: packages: packages.${name};
 in (flake-utils.lib.eachDefaultSystem (system: rec {
     packages = builtins.listToAttrs (map
       (name: {
@@ -23,7 +23,7 @@ in (flake-utils.lib.eachDefaultSystem (system: rec {
     overlays = final: prev: builtins.listToAttrs (map
       (name: {
         name = name;
-        value = createOverlay name system packages;
+        value = createOverlay name packages;
       })
       packageNames);
   }))
