@@ -16,8 +16,8 @@ rustPlatform.buildRustPackage rec {
     domain = "gitea.chiliahedron.wtf";
     owner  = "john-craig";
     repo   = "totp-port-knockd-rs";
-    hash = "sha256-YKk9UzG/F/ZY/CWsbQ/EyLMWr2gD89Ut8B2YttNyDp0=";
-    rev = "242c8df66f3b90c8fe3fca525693539f706c0138";
+    hash = "sha256-kxhWAKLK052eMg9YWEtMjuNr14dYVfv8+nBbsFJBAKs=";
+    rev = "14d8160617987cbf40eb48f37f82a9c766957294";
   };
 
   nativeBuildInputs = [
