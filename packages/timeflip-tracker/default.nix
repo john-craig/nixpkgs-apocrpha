@@ -8,8 +8,8 @@ buildPythonPackage {
     domain = "gitea.chiliahedron.wtf";
     owner = "john-craig";
     repo = "timeflip-tracker";
-    hash = "sha256-cOlV29pHQasyuCxiameFtCurKQqUylljcgwKpXwzfMs=";
-    rev = "99c52a9e33cde59b59394551a2e74c62fbe36822";
+    hash = "sha256-XpnyAWBQ0KTALMrnqANa4NkuvOav1q8t1jYJ5h09foA=";
+    rev = "9648b48c8d5884911c38614711413d20bd4612ac";
   };
 
   doCheck = false;

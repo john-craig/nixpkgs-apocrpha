@@ -8,8 +8,8 @@ buildPythonPackage rec {
     domain = "gitea.chiliahedron.wtf";
     owner = "john-craig";
     repo = "panmuphle";
-    hash = "sha256-QCrTMA53unmp477MjwcG9CAqK5dFalyl3CrFY8ZE20c=";
-    rev = "e557a9d11a318f786451314f87db7cf1b72eb619";
+    hash = "sha256-BC6Um0CPICpFC3d74ajBDvRphLM9d45sN27ZsOxNdCI=";
+    rev = "049630ff411df20cdbbf5ea25a8592435f2dcc10";
   };
 
   format = "pyproject";
