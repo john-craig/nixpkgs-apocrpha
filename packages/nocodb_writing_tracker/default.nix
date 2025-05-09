@@ -1,4 +1,4 @@
-{ pkgs, lib, fetchFromGitea, fetchFromGitHub } :
+{ pkgs, lib, fetchFromGitea, fetchFromGitHub }:
 
 with pkgs.python311Packages;
 buildPythonPackage rec {
@@ -6,14 +6,14 @@ buildPythonPackage rec {
 
   src = fetchFromGitea {
     domain = "gitea.chiliahedron.wtf";
-    owner  = "john-craig";
-    repo   = "nocodb_writing_tracker";
+    owner = "john-craig";
+    repo = "nocodb_writing_tracker";
     hash = "sha256-rrjO1/LzeA6qqZXgEnGG6xLo4t0Vnkrcs+1O8JINaiA=";
     rev = "3a3439a6c2944fb2a420a32c1bab96d40d327ce3";
   };
 
   format = "pyproject";
-  
+
   propagatedBuildInputs = [
     # ...
     setuptools

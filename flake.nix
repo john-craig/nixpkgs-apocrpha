@@ -9,15 +9,17 @@
     };
   };
 
-  outputs = { self, nixpkgs, flake-utils }: let
-    apocryphalNixosModules = import ./nixosModules;
-    apocryphalPackages = import ./packages { inherit nixpkgs flake-utils; };
-    apocryphalUtilities = import ./utilities;
-  in {
-    nixosModules = apocryphalNixosModules.nixosModules;
-    packages = apocryphalPackages.packages;
-    overlays = apocryphalPackages.overlays;
-    utilities = apocryphalUtilities.utilities;
-  };
+  outputs = { self, nixpkgs, flake-utils }:
+    let
+      apocryphalNixosModules = import ./nixosModules;
+      apocryphalPackages = import ./packages { inherit nixpkgs flake-utils; };
+      apocryphalUtilities = import ./utilities;
+    in
+    {
+      nixosModules = apocryphalNixosModules.nixosModules;
+      packages = apocryphalPackages.packages;
+      overlays = apocryphalPackages.overlays;
+      utilities = apocryphalUtilities.utilities;
+    };
 }
 

@@ -1,4 +1,4 @@
-{ pkgs, lib, fetchFromGitHub, fetchFromGitea, rustPlatform, pkg-config } :
+{ pkgs, lib, fetchFromGitHub, fetchFromGitea, rustPlatform, pkg-config }:
 let
   fenix = pkgs.callPackage
     (fetchFromGitHub {
@@ -14,8 +14,8 @@ rustPlatform.buildRustPackage rec {
 
   src = fetchFromGitea {
     domain = "gitea.chiliahedron.wtf";
-    owner  = "john-craig";
-    repo   = "totp-port-knockd-rs";
+    owner = "john-craig";
+    repo = "totp-port-knockd-rs";
     hash = "sha256-kxhWAKLK052eMg9YWEtMjuNr14dYVfv8+nBbsFJBAKs=";
     rev = "14d8160617987cbf40eb48f37f82a9c766957294";
   };

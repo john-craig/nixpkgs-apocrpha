@@ -10,7 +10,7 @@ buildPythonPackage {
     hash = "sha256-iN/fHidqphyhXDYNMmWONuTPcW8MeErI59kdLC2imPE=";
     rev = "e111b91e2b2fc17f6b3190232c229e7264b354ab";
   };
-  
+
   propagatedBuildInputs = [
     setuptools
     bleak

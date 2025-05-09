@@ -1,4 +1,5 @@
-{ nixpkgs, flake-utils }: let
+{ nixpkgs, flake-utils }:
+let
   # Path to the directory containing package subdirectories (adjust as necessary)
   packageDir = ./.;
 
@@ -12,18 +13,19 @@
     pkgs.callPackage ./${name} { };
 
   createOverlay = name: packages: packages.${name};
-in (flake-utils.lib.eachDefaultSystem (system: rec {
-    packages = builtins.listToAttrs (map
-      (name: {
-        name = name;
-        value = callPackageFor name system;
-      })
-      packageNames);
+in
+(flake-utils.lib.eachDefaultSystem (system: rec {
+  packages = builtins.listToAttrs (map
+    (name: {
+      name = name;
+      value = callPackageFor name system;
+    })
+    packageNames);
 
-    overlays = final: prev: builtins.listToAttrs (map
-      (name: {
-        name = name;
-        value = createOverlay name packages;
-      })
-      packageNames);
-  }))
+  overlays = final: prev: builtins.listToAttrs (map
+    (name: {
+      name = name;
+      value = createOverlay name packages;
+    })
+    packageNames);
+}))
