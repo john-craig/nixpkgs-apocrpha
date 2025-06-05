@@ -2,7 +2,8 @@
   description = "Apocrypha is a set of packages not available to the mainstream";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    # nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs?ref=release-25.05";
 
     flake-utils = {
       url = "github:numtide/flake-utils";
