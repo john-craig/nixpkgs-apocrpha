@@ -25,12 +25,13 @@ buildPythonPackage rec {
         domain = "gitea.chiliahedron.wtf";
         owner = "john-craig";
         repo = "obsidian-utils";
-        hash = "sha256-ZfujMlWs/IVITmVHvUJeazwPx43OxuVn1FXQ694RtiM=";
-        rev = "96ed4b9f0aea319046a832f766d457b88a63ceef";
+        hash = "sha256-6HDfUnE7r3NyNn9VIs66/uml/1CQglBEXtYGIL0CDlo=";
+        rev = "d012402263cc17e3a56122934406ab64003cc287";
       };
       version = "0.1.0";
       propagatedBuildInputs = [
         setuptools
+        pytest
       ];
 
       format = "pyproject";
