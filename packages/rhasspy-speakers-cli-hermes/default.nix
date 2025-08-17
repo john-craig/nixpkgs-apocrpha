@@ -1,4 +1,4 @@
-{ pkgs, fetchFromGitHub, autoconf, automake }:
+{ pkgs, fetchFromGitHub, autoconf, automake, extraAttrs }:
 
 with pkgs.python311Packages;
 buildPythonPackage {

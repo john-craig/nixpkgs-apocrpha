@@ -1,4 +1,4 @@
-{ pkgs, lib, fetchFromGitea, fetchFromGitHub }:
+{ pkgs, lib, fetchFromGitea, fetchFromGitHub, extraAttrs }:
 
 with pkgs.python311Packages;
 buildPythonPackage {

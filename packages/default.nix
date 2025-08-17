@@ -1,4 +1,4 @@
-{ nixpkgs, flake-utils }:
+{ nixpkgs, flake-utils, zig2nix }:
 let
   # Path to the directory containing package subdirectories (adjust as necessary)
   packageDir = ./.;
@@ -8,9 +8,18 @@ let
 
   callPackageFor = name: system:
     let
-      pkgs = import nixpkgs { inherit system; config.allowUnfree = true; };
+      pkgs = (import nixpkgs { 
+        inherit system; 
+        config.allowUnfree = true;
+      });
     in
-    pkgs.callPackage ./${name} { };
+    pkgs.callPackage ./${name} {
+      extraAttrs = {
+        inherit
+          system 
+          zig2nix;
+      };
+    };
 
   createOverlay = name: packages: packages.${name};
 in

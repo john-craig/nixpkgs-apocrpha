@@ -1,4 +1,4 @@
-{ pkgs, lib, buildGoModule, fetchFromGitea }:
+{ pkgs, lib, buildGoModule, fetchFromGitea, extraAttrs }:
 buildGoModule rec {
   name = "maturin-dr";
 

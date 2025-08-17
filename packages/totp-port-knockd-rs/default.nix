@@ -1,4 +1,4 @@
-{ pkgs, lib, fetchFromGitHub, fetchFromGitea, rustPlatform, pkg-config }:
+{ pkgs, lib, fetchFromGitHub, fetchFromGitea, rustPlatform, pkg-config, extraAttrs }:
 let
   fenix = pkgs.callPackage
     (fetchFromGitHub {

@@ -1,4 +1,4 @@
-{ lib, pkgs }:
+{ lib, pkgs, extraAttrs }:
 
 pkgs.stdenv.mkDerivation rec {
   pname = "hpssacli";

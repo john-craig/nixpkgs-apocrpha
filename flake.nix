@@ -7,13 +7,24 @@
 
     flake-utils = {
       url = "github:numtide/flake-utils";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    zig2nix = {
+      url = "github:Cloudef/zig2nix";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
+  outputs = { self, nixpkgs, flake-utils, zig2nix }:
     let
       apocryphalNixosModules = import ./nixosModules;
-      apocryphalPackages = import ./packages { inherit nixpkgs flake-utils; };
+      apocryphalPackages = import ./packages { 
+        inherit 
+          nixpkgs 
+          flake-utils
+          zig2nix; 
+      };
       apocryphalUtilities = import ./utilities;
     in
     {

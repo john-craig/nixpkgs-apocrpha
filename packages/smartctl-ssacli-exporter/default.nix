@@ -1,4 +1,4 @@
-{ lib, pkgs, buildGoModule, fetchFromGitHub }:
+{ lib, pkgs, buildGoModule, fetchFromGitHub, extraAttrs }:
 
 buildGoModule rec {
   name = "smartctl-ssacli-exporter";
