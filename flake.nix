@@ -42,8 +42,9 @@
           nativeBuildInputs = [ self.legacyPackages.${system}.sceptre ];
         } ''
           test -x "${self.legacyPackages.${system}.sceptre}/bin/sceptre"
-          sceptre --help >/dev/null
-          sceptre repository --help | grep -q "Usage: sceptre repository"
+           sceptre --help >/dev/null
+           sceptre repository --help | grep -q "Usage: sceptre repository"
+           sceptre specset publish --help | grep -q -- "--implementation-path"
           test ! -e "${self.legacyPackages.${system}.sceptre}/credentials"
           test ! -e "${self.legacyPackages.${system}.sceptre}/secrets"
           touch "$out"
@@ -59,6 +60,7 @@
         openspec-implementor = import ./tests/openspec-implementor.nix { inherit pkgs; };
         openspec-implementor-flake = import ./tests/openspec-implementor-flake.nix { inherit pkgs; };
         openspec-implementor-scheduler = import ./tests/openspec-implementor-scheduler.nix { inherit pkgs; };
+        sceptre-implementor = import ./tests/sceptre-implementor.nix { inherit pkgs; };
         opencode-agent = let
           opencodeAgent = self.legacyPackages.${system}.opencode-agent;
           fakeOpenCode = pkgs.writeShellScriptBin "opencode" ''

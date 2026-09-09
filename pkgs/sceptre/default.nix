@@ -7,8 +7,8 @@ rustPlatform.buildRustPackage rec {
   src = fetchFromGitHub {
     owner = "john-craig";
     repo = "sceptre";
-    rev = "90746c5dc7378b6f9141927c28f285b9c00b92a8";
-    hash = "sha256-6Tp2sUARnEPJ8whNu2V+0rzY+A4oFM7rryCwWbORokI=";
+    rev = "93694d94313b3658644055414a5bded2c55a9e89";
+    hash = "sha256-7ICBOhMNIYYF/Z80Ln6K4cfWM4trx+JJGssenT5BsP4=";
   };
 
   nativeBuildInputs = [ git ];
@@ -22,6 +22,14 @@ rustPlatform.buildRustPackage rec {
 
   preBuild = ''
     sed -i '/\[source."https:\/\/github.com\/rust-lang\/crates.io-index"\]/,/^$/d' "$NIX_BUILD_TOP/.cargo/config.toml"
+  '';
+
+  preCheck = ''
+    export GIT_CONFIG_COUNT=2
+    export GIT_CONFIG_KEY_0=user.email
+    export GIT_CONFIG_VALUE_0=build@example.invalid
+    export GIT_CONFIG_KEY_1=user.name
+    export GIT_CONFIG_VALUE_1=sceptre-build
   '';
 
   postInstall = ''

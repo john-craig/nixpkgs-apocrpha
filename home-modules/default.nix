@@ -6,6 +6,7 @@
   opencode-agents = ./opencode-agents;
   projectManagerAutomatedDevelopmentWorkflowsImplementor = ./project-manager/automated-development-workflows/implementor;
   projectManagerAutomatedDevelopmentWorkflowsImplementorScheduler = ./project-manager/automated-development-workflows/implementor-scheduler;
+  projectManagerAutomatedDevelopmentWorkflowsSceptreImplementor = ./project-manager/automated-development-workflows/sceptre-implementor;
   shellCliTools = ./shell-cli-tools;
   shellDevelopmentTools = ./shell-development-tools;
   shellSsh = ./shell-ssh;

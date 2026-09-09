@@ -25,7 +25,7 @@ sceptre mcp --help
 ## Package details
 
 - Version: `0.1.0`
-- Source revision: `40fcc69d2bc38963081858d37db7be2f2ebcd554`
+- Source revision: `93694d94313b3658644055414a5bded2c55a9e89`
 - License: MIT
 - Supported platforms: Unix platforms supported by Nixpkgs
 - Build dependencies: Rust and the locked Cargo dependency set
@@ -33,3 +33,7 @@ sceptre mcp --help
 
 Credentials, repository mappings, provider endpoints, and remote services are
 not embedded in this package.
+
+The `specset publish` command accepts repeatable `--implementation-path` values
+so callers can publish reviewed implementation files without staging unrelated
+worktree changes.

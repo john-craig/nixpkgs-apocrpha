@@ -363,6 +363,54 @@ The flake package supplies Git, jq, OpenSpec, OpenCode, the packaged
 Git transport authentication remain runtime requirements. Direct execution has
 the same publishing behavior as the Home Manager command; it is not a dry run.
 
+## Run a Grimoire-backed implementation
+
+For coordinated spec sets in the upstream Grimoire catalog, use the separate
+Sceptre-backed Home Manager module. It asks Sceptre to validate the manifest and
+select the next repository/specification pair, then invokes the exact registered
+OpenCode agent returned by Sceptre:
+
+```nix
+{
+  imports = [ inputs.nixpkgs-apocrypha.homeModules.projectManagerAutomatedDevelopmentWorkflowsSceptreImplementor ];
+  evak.project-manager.automated-development-workflows.sceptre-implementor = {
+    enable = true;
+    catalogPath = "/home/evak/programming/by_category/project_management/grimoire";
+    manifestPath = "specs/project-management/automated-development-workflow/spec-implementation-v1/manifest.yaml";
+    workRoot = "/tmp/evak-sceptre-work";
+  };
+}
+```
+
+Run one attempt manually with `sceptre-openspec-implementor`. The command
+snapshots the catalog's upstream default branch, clones the selected repository
+into private temporary state, materializes the selected specification, runs the
+assigned agent, and asks Sceptre to publish only the reviewed implementation
+paths. It does not use Grimoire's `local_path`, modify an existing checkout,
+merge the pull request, process feedback, synchronize merged specs, or deploy
+anything. Git transport, provider (`gh` or `tea`), and OpenCode authentication
+must already be configured.
+
+To schedule one serialized attempt every six hours:
+
+```nix
+evak.project-manager.automated-development-workflows.sceptre-implementor = {
+  enable = true;
+  catalogPath = "/home/evak/programming/by_category/project_management/grimoire";
+  manifestPath = "specs/project-management/automated-development-workflow/spec-implementation-v1/manifest.yaml";
+  interval = "6h";
+  persistent = false;
+  keepWorktree = true;
+};
+```
+
+This creates `evak-sceptre-openspec-implementor.service` and its user timer. A
+second activation exits successfully while an earlier run holds the private
+runtime lock. Successful and no-work runs remove temporary state; with
+`keepWorktree = true`, failed state is retained and its path is reported for
+diagnosis. The generic `openspec-implementor` and its scheduler remain the right
+choice for repositories without a Grimoire spec-set manifest.
+
 ## Schedule OpenSpec implementation
 
 The scheduler module installs a Linux `systemd.user` oneshot service and timer.
