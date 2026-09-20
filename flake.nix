@@ -51,6 +51,9 @@
         '';
         remaining-shell-user-configuration = import ./tests/remaining-shell-user-configuration.nix { inherit pkgs; };
         traefik-modules = import ./tests/traefik-modules.nix { inherit pkgs; };
+        receipt-scanner-module = import ./tests/receipt-scanner-module.nix { inherit pkgs; };
+        receipt-scanner-script = import ./tests/receipt-scanner-script.nix { inherit pkgs; };
+        receipt-scanner-static = import ./tests/receipt-scanner-static.nix { inherit pkgs; };
         opencode-agents = import ./tests/opencode-agents.nix {
           inherit pkgs;
         };
